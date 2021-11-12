@@ -43,3 +43,21 @@ func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) err
 	*resp = *submissionResult
 	return nil
 }
+
+func (s *server) Search(args map[string]interface{}, resp *[]*api.Entity) error {
+	ctx := context.Background() // TODO: replace with actual context
+	val, err := commons.Value(args, "parameters")
+	if err != nil {
+		return err
+	}
+	parameters, ok := val.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("key parameters is not a map[string]interface{} but a %T", val)
+	}
+	searchResult, err := s.impl.Search(ctx, parameters)
+	if err != nil {
+		return err
+	}
+	*resp = searchResult
+	return nil
+}
