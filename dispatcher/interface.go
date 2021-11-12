@@ -17,4 +17,11 @@ import (
 // customers side at a central place.
 type Dispatcher interface {
 	Entity(ctx context.Context, id string) (*api.Entity, error)
+	Submit(ctx context.Context, records []*api.Record) (*SubmissionResult, error)
+}
+
+// SubmissionResult provides additional information about a successful
+// data submission.
+type SubmissionResult struct {
+	RecordsAdded int
 }

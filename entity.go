@@ -1,5 +1,6 @@
 package api
 
 type Entity struct {
-	ID string
+	ID      string
+	Records []*Record
 }

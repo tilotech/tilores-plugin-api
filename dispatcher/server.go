@@ -2,6 +2,7 @@ package dispatcher
 
 import (
 	"context"
+	"fmt"
 
 	api "gitlab.com/tilotech/tilores-plugin-api"
 	"gitlab.com/tilotech/tilores-plugin-api/commons"
@@ -22,5 +23,23 @@ func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
 		return err
 	}
 	*resp = *entity
+	return nil
+}
+
+func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) error {
+	ctx := context.Background() // TODO: replace with actual context
+	val, err := commons.Value(args, "records")
+	if err != nil {
+		return err
+	}
+	records, ok := val.([]*api.Record)
+	if !ok {
+		return fmt.Errorf("key records is not a records list but a %T", val)
+	}
+	submissionResult, err := s.impl.Submit(ctx, records)
+	if err != nil {
+		return err
+	}
+	*resp = *submissionResult
 	return nil
 }
