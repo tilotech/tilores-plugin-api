@@ -44,7 +44,7 @@ func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) err
 	return nil
 }
 
-func (s *server) Search(args map[string]interface{}, resp *api.Entity) error {
+func (s *server) Search(args map[string]interface{}, resp *[]*api.Entity) error {
 	ctx := context.Background() // TODO: replace with actual context
 	val, err := commons.Value(args, "parameters")
 	if err != nil {
@@ -58,6 +58,6 @@ func (s *server) Search(args map[string]interface{}, resp *api.Entity) error {
 	if err != nil {
 		return err
 	}
-	*resp = *searchResult
+	*resp = searchResult
 	return nil
 }
