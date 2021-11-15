@@ -39,7 +39,6 @@ licensecheck: ## Check dependencies for forbidden licenses
 clean: ## Remove outdated file and empty cache
 	@rm -rf "$(go env GOCACHE)"
 	@rm -f coverage.*
-	@rm -f ./bin/tilores-cli
 
 .PHONY: help
 help: ## Display this help screen
