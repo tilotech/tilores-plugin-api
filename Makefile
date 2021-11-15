@@ -21,11 +21,19 @@ coverage: ## Generate coverage report
 	@go-acc ./...
 	@go tool cover -func=coverage.txt
 
+.PHONY: depcheck
+depcheck: ## Check dependencies for vulnerabilities
+	@go list -json -deps ./... | nancy sleuth
+
 .PHONY: upgrade
 upgrade: ## Upgrade the dependencies
 	@go get -u -t ./...
 	@go mod tidy
 	@go mod vendor
+
+.PHONY: licensecheck
+licensecheck: ## Check dependencies for forbidden licenses
+	@go-licenses check ./...
 
 .PHONY: clean
 clean: ## Remove outdated file and empty cache
