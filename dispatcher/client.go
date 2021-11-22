@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/rpc"
 
-	api "gitlab.com/tilotech/tilores-plugin-api"
+	api "github.com/tilotech/tilores-plugin-api"
 )
 
 type client struct {

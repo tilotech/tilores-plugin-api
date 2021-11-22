@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	api "gitlab.com/tilotech/tilores-plugin-api"
-	"gitlab.com/tilotech/tilores-plugin-api/commons"
+	api "github.com/tilotech/tilores-plugin-api"
+	"github.com/tilotech/tilores-plugin-api/commons"
 )
 
 type server struct {

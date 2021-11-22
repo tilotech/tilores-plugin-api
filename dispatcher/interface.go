@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"context"
 
-	api "gitlab.com/tilotech/tilores-plugin-api"
+	api "github.com/tilotech/tilores-plugin-api"
 )
 
 // Dispatcher is the interface used for communicating between the public facing
