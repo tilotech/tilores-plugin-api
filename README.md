@@ -33,7 +33,7 @@ package main
 
 import (
 	"github.com/hashicorp/go-plugin"
-	"gitlab.com/tilotech/tilores-plugin-api/dispatcher"
+	"github.com/tilotech/tilores-plugin-api/dispatcher"
 )
 
 func main() {
@@ -55,12 +55,12 @@ func main() {
 The following list is intended to give an overview about plugin providers and
 plugin consumers for each interface.
 
-### [dispatcher](https://pkg.go.dev/gitlab.com/tilotech/tilores-plugin-api/dispatcher#Dispatcher):
+### [dispatcher](https://pkg.go.dev/github.com/tilotech/tilores-plugin-api/dispatcher#Dispatcher):
 
 Known Providers:
 * TiloRes Core Dispatcher - proprietary default implementation
-* [Fake Dispatcher](https://gitlab.com/tilotech/tilores-plugin-fake-dispatcher) -
+* [Fake Dispatcher](https://github.com/tilotech/tilores-plugin-fake-dispatcher) -
   a dispatcher that fakes a TiloRes Core implementation for local API testing
 
 Known Consumers:
-* Customer projects generated using [TiloRes CLI](https://gitlab.com/tilotech/tilores-cli)
+* Customer projects generated using [TiloRes CLI](https://github.com/tilotech/tilores-cli)
