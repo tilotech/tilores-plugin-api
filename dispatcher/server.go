@@ -50,9 +50,9 @@ func (s *server) Search(args map[string]interface{}, resp *[]*api.Entity) error 
 	if err != nil {
 		return err
 	}
-	parameters, ok := val.(map[string]interface{})
+	parameters, ok := val.(*api.SearchParameters)
 	if !ok {
-		return fmt.Errorf("key parameters is not a map[string]interface{} but a %T", val)
+		return fmt.Errorf("key parameters is not a *api.SearchParameters but a %T", val)
 	}
 	searchResult, err := s.impl.Search(ctx, parameters)
 	if err != nil {

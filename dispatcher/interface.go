@@ -18,7 +18,7 @@ import (
 type Dispatcher interface {
 	Entity(ctx context.Context, id string) (*api.Entity, error)
 	Submit(ctx context.Context, records []*api.Record) (*SubmissionResult, error)
-	Search(ctx context.Context, parameters map[string]interface{}) ([]*api.Entity, error)
+	Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error)
 }
 
 // SubmissionResult provides additional information about a successful

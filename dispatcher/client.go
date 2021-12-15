@@ -41,7 +41,7 @@ func (c *client) Submit(ctx context.Context, records []*api.Record) (*Submission
 	return &submissionResult, nil
 }
 
-func (c *client) Search(ctx context.Context, parameters map[string]interface{}) ([]*api.Entity, error) {
+func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error) {
 	var searchResult []*api.Entity
 	err := c.client.Call(
 		"Plugin.Search",

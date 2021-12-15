@@ -33,7 +33,7 @@ upgrade: ## Upgrade the dependencies
 
 .PHONY: licensecheck
 licensecheck: ## Check dependencies for forbidden licenses
-	@go-licenses check ./...
+	@go-licenses check $$(go list -deps -test ./... | grep -v "\.test")
 
 .PHONY: clean
 clean: ## Remove outdated file and empty cache
