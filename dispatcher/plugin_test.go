@@ -28,6 +28,7 @@ func TestPlugin(t *testing.T) {
 	assert.Equal(t, 1, len(entity.Records))
 	assert.Equal(t, "bar", entity.Records[0].Data["foo"])
 	assert.Equal(t, 1, len(entity.Edges))
+	assert.Equal(t, 1, len(entity.Duplicates))
 
 	parameters := &api.SearchParameters{
 		"foo": "bar",
@@ -100,6 +101,12 @@ var testEntity = api.Entity{
 	},
 	Edges: api.Edges{
 		"12345:12345:STATIC",
+	},
+	Duplicates: api.Duplicates{
+		"12345": []string{
+			"12345",
+			"duplicateID",
+		},
 	},
 }
 
