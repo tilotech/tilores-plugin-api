@@ -27,6 +27,7 @@ func TestPlugin(t *testing.T) {
 	assert.NotNil(t, entity)
 	assert.Equal(t, 1, len(entity.Records))
 	assert.Equal(t, "bar", entity.Records[0].Data["foo"])
+	assert.Equal(t, 1, len(entity.Edges))
 
 	parameters := &api.SearchParameters{
 		"foo": "bar",
@@ -96,6 +97,9 @@ var testEntity = api.Entity{
 				"foo": "bar",
 			},
 		},
+	},
+	Edges: api.Edges{
+		"12345:12345:STATIC",
 	},
 }
 
