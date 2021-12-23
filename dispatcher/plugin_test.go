@@ -37,6 +37,16 @@ func TestPlugin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, entities)
 	assert.Equal(t, 1, len(entities))
+
+	err = dsp.RemoveConnectionBan(context.Background(), &dispatcher.RemoveConnectionBanInput{
+		Reference: "123123",
+		EntityID:  "someID",
+		Others:    []string{"someOtherID"},
+		Meta: dispatcher.RemoveConnectionBanMeta{
+			User:   "someUser",
+			Reason: "someReason",
+		},
+	})
 }
 
 func providePluginServer(ctx context.Context, reattachConfigCh chan<- *plugin.ReattachConfig) {
@@ -124,4 +134,8 @@ func (d *testDispatcher) Submit(_ context.Context, records []*api.Record) (*disp
 	return &dispatcher.SubmissionResult{
 		RecordsAdded: 1,
 	}, nil
+}
+
+func (d *testDispatcher) RemoveConnectionBan(_ context.Context, input *dispatcher.RemoveConnectionBanInput) error {
+	return nil
 }

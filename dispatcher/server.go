@@ -44,6 +44,23 @@ func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) err
 	return nil
 }
 
+func (s *server) RemoveConnectionBan(args map[string]interface{}, _ *interface{}) error {
+	ctx := context.Background() // TODO: replace with actual context
+	val, err := commons.Value(args, "input")
+	if err != nil {
+		return err
+	}
+	input, ok := val.(*RemoveConnectionBanInput)
+	if !ok {
+		return fmt.Errorf("key input is not a *RemoveConnectionBanInput but a %T", val)
+	}
+	err = s.impl.RemoveConnectionBan(ctx, input)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *server) Search(args map[string]interface{}, resp *[]*api.Entity) error {
 	ctx := context.Background() // TODO: replace with actual context
 	val, err := commons.Value(args, "parameters")

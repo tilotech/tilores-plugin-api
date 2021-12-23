@@ -55,3 +55,14 @@ func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) (
 	}
 	return searchResult, nil
 }
+
+func (c *client) RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error {
+	err := c.client.Call(
+		"Plugin.RemoveConnectionBan",
+		map[string]interface{}{
+			"input": input,
+		},
+		nil,
+	)
+	return err
+}
