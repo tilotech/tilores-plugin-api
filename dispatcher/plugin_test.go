@@ -3,13 +3,12 @@ package dispatcher_test
 import (
 	"context"
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tilotech/tilores-plugin-api"
 	"github.com/tilotech/tilores-plugin-api/dispatcher"
+	"testing"
 )
 
 func TestPlugin(t *testing.T) {
@@ -38,6 +37,27 @@ func TestPlugin(t *testing.T) {
 	assert.NotNil(t, entities)
 	assert.Equal(t, 1, len(entities))
 
+	disassembleOutput, err := dsp.Disassemble(context.Background(), &dispatcher.DisassembleInput{
+		Reference: "123123",
+		Edges: []dispatcher.DisassembleEdge{
+			{
+				A: "abc",
+				B: "def",
+			},
+		},
+		RecordIDs: []string{
+			"12345",
+		},
+		CreateConnectionBan: true,
+		Meta: dispatcher.DisassembleMeta{
+			User:   "someUser",
+			Reason: "someReason",
+		},
+		Timeout: nil,
+	})
+	assert.NoError(t, err)
+	assert.IsType(t, &dispatcher.DisassembleOutput{}, disassembleOutput)
+
 	err = dsp.RemoveConnectionBan(context.Background(), &dispatcher.RemoveConnectionBanInput{
 		Reference: "123123",
 		EntityID:  "someID",
@@ -47,6 +67,8 @@ func TestPlugin(t *testing.T) {
 			Reason: "someReason",
 		},
 	})
+	assert.Error(t, err)
+	assert.Equal(t, "forced remove connection ban error", err.Error())
 }
 
 func providePluginServer(ctx context.Context, reattachConfigCh chan<- *plugin.ReattachConfig) {
@@ -136,6 +158,14 @@ func (d *testDispatcher) Submit(_ context.Context, records []*api.Record) (*disp
 	}, nil
 }
 
+func (d *testDispatcher) Disassemble(_ context.Context, input *dispatcher.DisassembleInput) (*dispatcher.DisassembleOutput, error) {
+	return &dispatcher.DisassembleOutput{
+		DeletedEdges:   1,
+		DeletedRecords: 1,
+		EntityIDs:      []string{"abcd"},
+	}, nil
+}
+
 func (d *testDispatcher) RemoveConnectionBan(_ context.Context, input *dispatcher.RemoveConnectionBanInput) error {
-	return nil
+	return fmt.Errorf("forced remove connection ban error")
 }

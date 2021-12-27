@@ -56,13 +56,26 @@ func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) (
 	return searchResult, nil
 }
 
+func (c *client) Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error) {
+	var output DisassembleOutput
+	err := c.client.Call(
+		"Plugin.Disassemble",
+		map[string]interface{}{
+			"input": input,
+		},
+		&output,
+	)
+	return &output, err
+}
+
 func (c *client) RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error {
+	var reply interface{}
 	err := c.client.Call(
 		"Plugin.RemoveConnectionBan",
 		map[string]interface{}{
 			"input": input,
 		},
-		nil,
+		&reply,
 	)
 	return err
 }
