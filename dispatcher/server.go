@@ -12,7 +12,6 @@ type server struct {
 	impl Dispatcher
 }
 
-//Entity
 func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
 	ctx := context.Background() // TODO: replace with actual context
 	id, err := commons.StringValue(args, "id")
