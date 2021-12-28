@@ -12,6 +12,7 @@ type server struct {
 	impl Dispatcher
 }
 
+//Entity
 func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
 	ctx := context.Background() // TODO: replace with actual context
 	id, err := commons.StringValue(args, "id")
@@ -26,21 +27,21 @@ func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
 	return nil
 }
 
-func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) error {
+func (s *server) Submit(args map[string]interface{}, resp *SubmitOutput) error {
 	ctx := context.Background() // TODO: replace with actual context
-	val, err := commons.Value(args, "records")
+	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
 	}
-	records, ok := val.([]*api.Record)
+	input, ok := val.(*SubmitInput)
 	if !ok {
-		return fmt.Errorf("key records is not a records list but a %T", val)
+		return fmt.Errorf("key records is not a *SubmitInput but a %T", val)
 	}
-	submissionResult, err := s.impl.Submit(ctx, records)
+	submitOutput, err := s.impl.Submit(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = *submissionResult
+	*resp = *submitOutput
 	return nil
 }
 

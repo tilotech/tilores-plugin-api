@@ -37,6 +37,17 @@ func TestPlugin(t *testing.T) {
 	assert.NotNil(t, entities)
 	assert.Equal(t, 1, len(entities))
 
+	submitOutput, err := dsp.Submit(context.Background(), &dispatcher.SubmitInput{
+		Records: []*api.Record{
+			{
+				ID: "12345", Data: map[string]interface{}{
+					"foo": "bar"},
+			},
+		},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, submitOutput.RecordsAdded)
+
 	disassembleOutput, err := dsp.Disassemble(context.Background(), &dispatcher.DisassembleInput{
 		Reference: "123123",
 		Edges: []dispatcher.DisassembleEdge{
@@ -56,7 +67,7 @@ func TestPlugin(t *testing.T) {
 		Timeout: nil,
 	})
 	assert.NoError(t, err)
-	assert.IsType(t, &dispatcher.DisassembleOutput{}, disassembleOutput)
+	assert.Equal(t, []string{"abcd"}, disassembleOutput.EntityIDs)
 
 	err = dsp.RemoveConnectionBan(context.Background(), &dispatcher.RemoveConnectionBanInput{
 		Reference: "123123",
@@ -142,23 +153,23 @@ var testEntity = api.Entity{
 	},
 }
 
-func (d *testDispatcher) Entity(_ context.Context, id string) (*api.Entity, error) {
+func (d *testDispatcher) Entity(_ context.Context, _ string) (*api.Entity, error) {
 	return &testEntity, nil
 }
 
-func (d *testDispatcher) Search(_ context.Context, parameters *api.SearchParameters) ([]*api.Entity, error) {
+func (d *testDispatcher) Search(_ context.Context, _ *api.SearchParameters) ([]*api.Entity, error) {
 	return []*api.Entity{
 		&testEntity,
 	}, nil
 }
 
-func (d *testDispatcher) Submit(_ context.Context, records []*api.Record) (*dispatcher.SubmissionResult, error) {
-	return &dispatcher.SubmissionResult{
+func (d *testDispatcher) Submit(_ context.Context, _ *dispatcher.SubmitInput) (*dispatcher.SubmitOutput, error) {
+	return &dispatcher.SubmitOutput{
 		RecordsAdded: 1,
 	}, nil
 }
 
-func (d *testDispatcher) Disassemble(_ context.Context, input *dispatcher.DisassembleInput) (*dispatcher.DisassembleOutput, error) {
+func (d *testDispatcher) Disassemble(_ context.Context, _ *dispatcher.DisassembleInput) (*dispatcher.DisassembleOutput, error) {
 	return &dispatcher.DisassembleOutput{
 		DeletedEdges:   1,
 		DeletedRecords: 1,
@@ -166,6 +177,6 @@ func (d *testDispatcher) Disassemble(_ context.Context, input *dispatcher.Disass
 	}, nil
 }
 
-func (d *testDispatcher) RemoveConnectionBan(_ context.Context, input *dispatcher.RemoveConnectionBanInput) error {
+func (d *testDispatcher) RemoveConnectionBan(_ context.Context, _ *dispatcher.RemoveConnectionBanInput) error {
 	return fmt.Errorf("forced remove connection ban error")
 }

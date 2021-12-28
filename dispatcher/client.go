@@ -11,49 +11,19 @@ type client struct {
 	client *rpc.Client
 }
 
-func (c *client) Entity(ctx context.Context, id string) (*api.Entity, error) {
-	var entity api.Entity
-	err := c.client.Call(
-		"Plugin.Entity",
-		map[string]interface{}{
-			"id": id,
-		},
-		&entity,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &entity, nil
-}
-
-func (c *client) Submit(ctx context.Context, records []*api.Record) (*SubmissionResult, error) {
-	var submissionResult SubmissionResult
+func (c *client) Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error) {
+	var submitOutput SubmitOutput
 	err := c.client.Call(
 		"Plugin.Submit",
 		map[string]interface{}{
-			"records": records,
+			"input": input,
 		},
-		&submissionResult,
+		&submitOutput,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &submissionResult, nil
-}
-
-func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error) {
-	var searchResult []*api.Entity
-	err := c.client.Call(
-		"Plugin.Search",
-		map[string]interface{}{
-			"parameters": parameters,
-		},
-		&searchResult,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return searchResult, nil
+	return &submitOutput, nil
 }
 
 func (c *client) Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error) {
@@ -78,4 +48,34 @@ func (c *client) RemoveConnectionBan(ctx context.Context, input *RemoveConnectio
 		&reply,
 	)
 	return err
+}
+
+func (c *client) Entity(ctx context.Context, id string) (*api.Entity, error) {
+	var entity api.Entity
+	err := c.client.Call(
+		"Plugin.Entity",
+		map[string]interface{}{
+			"id": id,
+		},
+		&entity,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
+func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error) {
+	var searchResult []*api.Entity
+	err := c.client.Call(
+		"Plugin.Search",
+		map[string]interface{}{
+			"parameters": parameters,
+		},
+		&searchResult,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return searchResult, nil
 }

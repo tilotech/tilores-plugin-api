@@ -18,15 +18,20 @@ import (
 // customers side at a central place.
 type Dispatcher interface {
 	Entity(ctx context.Context, id string) (*api.Entity, error)
-	Submit(ctx context.Context, records []*api.Record) (*SubmissionResult, error)
+	Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error)
 	Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error)
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
 }
 
-// SubmissionResult provides additional information about a successful
+// SubmitInput includes the data requied to submit
+type SubmitInput struct {
+	Records []*api.Record
+}
+
+// SubmitOutput provides additional information about a successful
 // data submission.
-type SubmissionResult struct {
+type SubmitOutput struct {
 	RecordsAdded int
 }
 
@@ -78,6 +83,7 @@ type RemoveConnectionBanMeta struct {
 }
 
 func init() {
-	gob.Register(&RemoveConnectionBanInput{})
+	gob.Register(&SubmitInput{})
 	gob.Register(&DisassembleInput{})
+	gob.Register(&RemoveConnectionBanInput{})
 }
