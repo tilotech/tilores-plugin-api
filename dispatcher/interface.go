@@ -26,13 +26,13 @@ type Dispatcher interface {
 
 // SubmitInput includes the data requied to submit
 type SubmitInput struct {
-	Records []*api.Record
+	Records []*api.Record `json:"records"`
 }
 
 // SubmitOutput provides additional information about a successful
 // data submission.
 type SubmitOutput struct {
-	RecordsAdded int
+	RecordsAdded int `json:"recordsAdded"`
 }
 
 // DisassembleInput is the data required to remove one or more edges or even records
