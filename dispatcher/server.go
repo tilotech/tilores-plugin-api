@@ -26,21 +26,56 @@ func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
 	return nil
 }
 
-func (s *server) Submit(args map[string]interface{}, resp *SubmissionResult) error {
+func (s *server) Submit(args map[string]interface{}, resp *SubmitOutput) error {
 	ctx := context.Background() // TODO: replace with actual context
-	val, err := commons.Value(args, "records")
+	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
 	}
-	records, ok := val.([]*api.Record)
+	input, ok := val.(*SubmitInput)
 	if !ok {
-		return fmt.Errorf("key records is not a records list but a %T", val)
+		return fmt.Errorf("key records is not a *SubmitInput but a %T", val)
 	}
-	submissionResult, err := s.impl.Submit(ctx, records)
+	submitOutput, err := s.impl.Submit(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = *submissionResult
+	*resp = *submitOutput
+	return nil
+}
+
+func (s *server) Disassemble(args map[string]interface{}, resp *DisassembleOutput) error {
+	ctx := context.Background() // TODO: replace with actual context
+	val, err := commons.Value(args, "input")
+	if err != nil {
+		return err
+	}
+	input, ok := val.(*DisassembleInput)
+	if !ok {
+		return fmt.Errorf("key input is not a *DisassembleInput but a %T", val)
+	}
+	disassembleOutput, err := s.impl.Disassemble(ctx, input)
+	if err != nil {
+		return err
+	}
+	*resp = *disassembleOutput
+	return nil
+}
+
+func (s *server) RemoveConnectionBan(args map[string]interface{}, _ *interface{}) error {
+	ctx := context.Background() // TODO: replace with actual context
+	val, err := commons.Value(args, "input")
+	if err != nil {
+		return err
+	}
+	input, ok := val.(*RemoveConnectionBanInput)
+	if !ok {
+		return fmt.Errorf("key input is not a *RemoveConnectionBanInput but a %T", val)
+	}
+	err = s.impl.RemoveConnectionBan(ctx, input)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
