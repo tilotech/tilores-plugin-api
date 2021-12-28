@@ -3,8 +3,9 @@ package dispatcher
 import (
 	"context"
 	"encoding/gob"
-	api "github.com/tilotech/tilores-plugin-api"
 	"time"
+
+	api "github.com/tilotech/tilores-plugin-api"
 )
 
 // Dispatcher is the interface used for communicating between the public facing
