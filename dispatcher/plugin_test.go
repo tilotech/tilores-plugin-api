@@ -3,12 +3,13 @@ package dispatcher_test
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tilotech/tilores-plugin-api"
 	"github.com/tilotech/tilores-plugin-api/dispatcher"
-	"testing"
 )
 
 func TestPlugin(t *testing.T) {
