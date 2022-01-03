@@ -3,8 +3,6 @@ package dispatcher
 import (
 	"context"
 	"net/rpc"
-
-	api "github.com/tilotech/tilores-plugin-api"
 )
 
 type client struct {
@@ -12,12 +10,16 @@ type client struct {
 }
 
 func (c *client) Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error) {
+	args := map[string]interface{}{
+		"input": input,
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		args["deadline"] = deadline
+	}
 	var submitOutput SubmitOutput
 	err := c.client.Call(
 		"Plugin.Submit",
-		map[string]interface{}{
-			"input": input,
-		},
+		args,
 		&submitOutput,
 	)
 	if err != nil {
@@ -27,55 +29,71 @@ func (c *client) Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput,
 }
 
 func (c *client) Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error) {
+	args := map[string]interface{}{
+		"input": input,
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		args["deadline"] = deadline
+	}
 	var output DisassembleOutput
 	err := c.client.Call(
 		"Plugin.Disassemble",
-		map[string]interface{}{
-			"input": input,
-		},
+		args,
 		&output,
 	)
 	return &output, err
 }
 
 func (c *client) RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error {
+	args := map[string]interface{}{
+		"input": input,
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		args["deadline"] = deadline
+	}
 	var reply interface{}
 	err := c.client.Call(
 		"Plugin.RemoveConnectionBan",
-		map[string]interface{}{
-			"input": input,
-		},
+		args,
 		&reply,
 	)
 	return err
 }
 
-func (c *client) Entity(ctx context.Context, id string) (*api.Entity, error) {
-	var entity api.Entity
+func (c *client) Entity(ctx context.Context, input *EntityInput) (*EntityOutput, error) {
+	args := map[string]interface{}{
+		"input": input,
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		args["deadline"] = deadline
+	}
+	var output EntityOutput
 	err := c.client.Call(
 		"Plugin.Entity",
-		map[string]interface{}{
-			"id": id,
-		},
-		&entity,
+		args,
+		&output,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &entity, nil
+	return &output, nil
 }
 
-func (c *client) Search(ctx context.Context, parameters *api.SearchParameters) ([]*api.Entity, error) {
-	var searchResult []*api.Entity
+func (c *client) Search(ctx context.Context, input *SearchInput) (*SearchOutput, error) {
+	args := map[string]interface{}{
+		"input": input,
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		args["deadline"] = deadline
+	}
+	var output SearchOutput
 	err := c.client.Call(
 		"Plugin.Search",
-		map[string]interface{}{
-			"parameters": parameters,
-		},
-		&searchResult,
+		args,
+		&output,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return searchResult, nil
+	return &output, nil
 }

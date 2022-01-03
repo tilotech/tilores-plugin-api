@@ -11,5 +11,5 @@ func ExampleInitialize() {
 	if err != nil {
 		panic(err)
 	}
-	dispatcher.Entity(context.Background(), "uuid")
+	dispatcher.Entity(context.Background(), &EntityInput{ID: "uuid"})
 }
