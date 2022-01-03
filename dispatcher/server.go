@@ -3,8 +3,8 @@ package dispatcher
 import (
 	"context"
 	"fmt"
+	"time"
 
-	api "github.com/tilotech/tilores-plugin-api"
 	"github.com/tilotech/tilores-plugin-api/commons"
 )
 
@@ -12,22 +12,30 @@ type server struct {
 	impl Dispatcher
 }
 
-func (s *server) Entity(args map[string]interface{}, resp *api.Entity) error {
-	ctx := context.Background() // TODO: replace with actual context
-	id, err := commons.StringValue(args, "id")
+func (s *server) Entity(args map[string]interface{}, resp *EntityOutput) error {
+	ctx, cancel := createContext(args)
+	defer cancel()
+
+	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
 	}
-	entity, err := s.impl.Entity(ctx, id)
+	input, ok := val.(*EntityInput)
+	if !ok {
+		return fmt.Errorf("key records is not a *EntityInput but a %T", val)
+	}
+	output, err := s.impl.Entity(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = *entity
+	*resp = *output
 	return nil
 }
 
 func (s *server) Submit(args map[string]interface{}, resp *SubmitOutput) error {
-	ctx := context.Background() // TODO: replace with actual context
+	ctx, cancel := createContext(args)
+	defer cancel()
+
 	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
@@ -36,16 +44,18 @@ func (s *server) Submit(args map[string]interface{}, resp *SubmitOutput) error {
 	if !ok {
 		return fmt.Errorf("key records is not a *SubmitInput but a %T", val)
 	}
-	submitOutput, err := s.impl.Submit(ctx, input)
+	output, err := s.impl.Submit(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = *submitOutput
+	*resp = *output
 	return nil
 }
 
 func (s *server) Disassemble(args map[string]interface{}, resp *DisassembleOutput) error {
-	ctx := context.Background() // TODO: replace with actual context
+	ctx, cancel := createContext(args)
+	defer cancel()
+
 	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
@@ -54,16 +64,18 @@ func (s *server) Disassemble(args map[string]interface{}, resp *DisassembleOutpu
 	if !ok {
 		return fmt.Errorf("key input is not a *DisassembleInput but a %T", val)
 	}
-	disassembleOutput, err := s.impl.Disassemble(ctx, input)
+	output, err := s.impl.Disassemble(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = *disassembleOutput
+	*resp = *output
 	return nil
 }
 
 func (s *server) RemoveConnectionBan(args map[string]interface{}, _ *interface{}) error {
-	ctx := context.Background() // TODO: replace with actual context
+	ctx, cancel := createContext(args)
+	defer cancel()
+
 	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
@@ -79,20 +91,33 @@ func (s *server) RemoveConnectionBan(args map[string]interface{}, _ *interface{}
 	return nil
 }
 
-func (s *server) Search(args map[string]interface{}, resp *[]*api.Entity) error {
-	ctx := context.Background() // TODO: replace with actual context
-	val, err := commons.Value(args, "parameters")
+func (s *server) Search(args map[string]interface{}, resp *SearchOutput) error {
+	ctx, cancel := createContext(args)
+	defer cancel()
+
+	val, err := commons.Value(args, "input")
 	if err != nil {
 		return err
 	}
-	parameters, ok := val.(*api.SearchParameters)
+	input, ok := val.(*SearchInput)
 	if !ok {
-		return fmt.Errorf("key parameters is not a *api.SearchParameters but a %T", val)
+		return fmt.Errorf("key input is not a *SearchInput but a %T", val)
 	}
-	searchResult, err := s.impl.Search(ctx, parameters)
+	output, err := s.impl.Search(ctx, input)
 	if err != nil {
 		return err
 	}
-	*resp = searchResult
+	*resp = *output
 	return nil
+}
+
+func createContext(args map[string]interface{}) (context.Context, context.CancelFunc) {
+	ctx := context.Background()
+	if deadlineVal, err := commons.Value(args, "deadline"); err == nil {
+		if deadline, ok := deadlineVal.(time.Time); ok {
+			ctx, cancel := context.WithDeadline(ctx, deadline)
+			return ctx, cancel
+		}
+	}
+	return ctx, func() {}
 }

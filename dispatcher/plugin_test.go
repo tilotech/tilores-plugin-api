@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
@@ -17,26 +18,30 @@ func TestPlugin(t *testing.T) {
 	defer cancel()
 
 	reattachConfigCh := make(chan *plugin.ReattachConfig, 1)
-	go providePluginServer(ctx, reattachConfigCh)
+	pluginImpl := &testDispatcher{}
+	go providePluginServer(ctx, reattachConfigCh, pluginImpl)
 
 	dsp, err := createPluginClient(reattachConfigCh)
 	require.NoError(t, err)
 
-	entity, err := dsp.Entity(context.Background(), "abcd")
+	contextWithDeadline, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	defer cancel()
+	entityOutput, err := dsp.Entity(contextWithDeadline, &dispatcher.EntityInput{ID: "abcd"})
 	assert.NoError(t, err)
-	assert.NotNil(t, entity)
-	assert.Equal(t, 1, len(entity.Records))
-	assert.Equal(t, "bar", entity.Records[0].Data["foo"])
-	assert.Equal(t, 1, len(entity.Edges))
-	assert.Equal(t, 1, len(entity.Duplicates))
+	assert.NotNil(t, entityOutput)
+	assert.Equal(t, 1, len(entityOutput.Entity.Records))
+	assert.Equal(t, "bar", entityOutput.Entity.Records[0].Data["foo"])
+	assert.Equal(t, 1, len(entityOutput.Entity.Edges))
+	assert.Equal(t, 1, len(entityOutput.Entity.Duplicates))
+	assert.True(t, pluginImpl.deadlineExists)
 
 	parameters := &api.SearchParameters{
 		"foo": "bar",
 	}
-	entities, err := dsp.Search(context.Background(), parameters)
+	searchOutput, err := dsp.Search(context.Background(), &dispatcher.SearchInput{Parameters: parameters})
 	assert.NoError(t, err)
-	assert.NotNil(t, entities)
-	assert.Equal(t, 1, len(entities))
+	assert.NotNil(t, searchOutput)
+	assert.Equal(t, 1, len(searchOutput.Entities))
 
 	submitOutput, err := dsp.Submit(context.Background(), &dispatcher.SubmitInput{
 		Records: []*api.Record{
@@ -83,10 +88,10 @@ func TestPlugin(t *testing.T) {
 	assert.Equal(t, "forced remove connection ban error", err.Error())
 }
 
-func providePluginServer(ctx context.Context, reattachConfigCh chan<- *plugin.ReattachConfig) {
+func providePluginServer(ctx context.Context, reattachConfigCh chan<- *plugin.ReattachConfig, pluginImpl *testDispatcher) {
 	var pluginMap = map[string]plugin.Plugin{
 		"dispatcher": &dispatcher.Plugin{
-			Impl: &testDispatcher{},
+			Impl: pluginImpl,
 		},
 	}
 	plugin.Serve(&plugin.ServeConfig{
@@ -131,7 +136,9 @@ func createPluginClient(reattachConfigCh chan *plugin.ReattachConfig) (dispatche
 	return impl, nil
 }
 
-type testDispatcher struct{}
+type testDispatcher struct {
+	deadlineExists bool
+}
 
 var testEntity = api.Entity{
 	ID: "abcd",
@@ -154,13 +161,21 @@ var testEntity = api.Entity{
 	},
 }
 
-func (d *testDispatcher) Entity(_ context.Context, _ string) (*api.Entity, error) {
-	return &testEntity, nil
+func (d *testDispatcher) Entity(ctx context.Context, _ *dispatcher.EntityInput) (*dispatcher.EntityOutput, error) {
+	_, d.deadlineExists = ctx.Deadline()
+	return &dispatcher.EntityOutput{
+		Entity: &testEntity,
+	}, nil
 }
 
-func (d *testDispatcher) Search(_ context.Context, _ *api.SearchParameters) ([]*api.Entity, error) {
-	return []*api.Entity{
-		&testEntity,
+func (d *testDispatcher) Search(_ context.Context, _ *dispatcher.SearchInput) (*dispatcher.SearchOutput, error) {
+	return &dispatcher.SearchOutput{
+		Entities: []*api.Entity{
+			&testEntity,
+		},
+		Hits: dispatcher.Hits{
+			"someRecordID": []string{"someRuleName"},
+		},
 	}, nil
 }
 
