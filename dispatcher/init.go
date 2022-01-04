@@ -2,6 +2,7 @@ package dispatcher
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 
 	"github.com/hashicorp/go-plugin"
@@ -21,7 +22,9 @@ func Initialize(cmd *exec.Cmd) (Dispatcher, KillFunc, error) {
 		Plugins: map[string]plugin.Plugin{
 			"dispatcher": &Plugin{},
 		},
-		Cmd: cmd,
+		Cmd:        cmd,
+		SyncStdout: os.Stdout,
+		SyncStderr: os.Stderr,
 	})
 
 	rpcClient, err := client.Client()
