@@ -4,6 +4,6 @@ package api
 //
 // Each Record must have a unique ID.
 type Record struct {
-	ID   string
-	Data map[string]interface{}
+	ID   string                 `json:"id"`
+	Data map[string]interface{} `json:"data"`
 }
