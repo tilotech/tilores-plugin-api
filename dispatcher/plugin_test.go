@@ -159,6 +159,9 @@ var testEntity = api.Entity{
 			"duplicateID",
 		},
 	},
+	Hits: api.Hits{
+		"12345": []string{"someRuleName"},
+	},
 }
 
 func (d *testDispatcher) Entity(ctx context.Context, _ *dispatcher.EntityInput) (*dispatcher.EntityOutput, error) {
@@ -172,9 +175,6 @@ func (d *testDispatcher) Search(_ context.Context, _ *dispatcher.SearchInput) (*
 	return &dispatcher.SearchOutput{
 		Entities: []*api.Entity{
 			&testEntity,
-		},
-		Hits: dispatcher.Hits{
-			"someRecordID": []string{"someRuleName"},
 		},
 	}, nil
 }
