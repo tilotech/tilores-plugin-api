@@ -1,15 +1,25 @@
-package dispatcher
+package dispatcher_test
 
 import (
 	"context"
 	"os/exec"
+
+	"github.com/tilotech/tilores-plugin-api/dispatcher"
 )
 
 func ExampleInitialize() {
-	dispatcher, kill, err := Initialize(exec.Command("/path/to/plugin"))
+	dsp, kill, rc, err := dispatcher.Initialize(exec.Command("/path/to/plugin"), nil)
 	defer kill()
 	if err != nil {
 		panic(err)
 	}
-	dispatcher.Entity(context.Background(), &EntityInput{ID: "uuid"})
+	dsp.Entity(context.Background(), &dispatcher.EntityInput{ID: "uuid"})
+
+	dsp, kill, _, err = dispatcher.Initialize(exec.Command("/path/to/plugin"), rc)
+	defer kill()
+	if err != nil {
+		panic(err)
+	}
+
+	dsp.Entity(context.Background(), &dispatcher.EntityInput{ID: "another-uuid"})
 }
