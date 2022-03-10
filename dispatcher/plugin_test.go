@@ -6,25 +6,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/go-plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tilotech/go-plugin"
 	api "github.com/tilotech/tilores-plugin-api"
 	"github.com/tilotech/tilores-plugin-api/dispatcher"
 )
 
 func TestPlugin(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	reattachConfigCh := make(chan *plugin.ReattachConfig, 1)
 	pluginImpl := &testDispatcher{}
-	go providePluginServer(ctx, reattachConfigCh, pluginImpl)
-
-	dsp, err := createPluginClient(reattachConfigCh)
+	dsp, term, err := dispatcher.Connect(
+		plugin.StartWithProvider(dispatcher.Provide(pluginImpl)),
+		plugin.DefaultConfig(),
+	)
 	require.NoError(t, err)
+	defer term()
 
-	contextWithDeadline, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	contextWithDeadline, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	entityOutput, err := dsp.Entity(contextWithDeadline, &dispatcher.EntityInput{ID: "abcd"})
 	assert.NoError(t, err)
@@ -86,54 +84,6 @@ func TestPlugin(t *testing.T) {
 	})
 	assert.Error(t, err)
 	assert.Equal(t, "forced remove connection ban error", err.Error())
-}
-
-func providePluginServer(ctx context.Context, reattachConfigCh chan<- *plugin.ReattachConfig, pluginImpl *testDispatcher) {
-	var pluginMap = map[string]plugin.Plugin{
-		"dispatcher": &dispatcher.Plugin{
-			Impl: pluginImpl,
-		},
-	}
-	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: dispatcher.Handshake,
-		Plugins:         pluginMap,
-		Test: &plugin.ServeTestConfig{
-			Context:          ctx,
-			ReattachConfigCh: reattachConfigCh,
-		},
-	})
-}
-
-func createPluginClient(reattachConfigCh chan *plugin.ReattachConfig) (dispatcher.Dispatcher, error) {
-	reattachConfig := <-reattachConfigCh
-	if reattachConfig == nil {
-		return nil, fmt.Errorf("expected reattach config, but received none")
-	}
-
-	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: dispatcher.Handshake,
-		Plugins: map[string]plugin.Plugin{
-			"dispatcher": &dispatcher.Plugin{},
-		},
-		Reattach: reattachConfig,
-	})
-
-	rpcClient, err := client.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	raw, err := rpcClient.Dispense("dispatcher")
-	if err != nil {
-		return nil, err
-	}
-
-	impl, ok := raw.(dispatcher.Dispatcher)
-	if !ok {
-		return nil, fmt.Errorf("not a dispatcher plugin: %T", raw)
-	}
-
-	return impl, nil
 }
 
 type testDispatcher struct {
