@@ -22,10 +22,11 @@ type Duplicates map[string][]string
 // Hits lists all matched rules per matched record id
 //
 // Example (in JSON):
-// {
-//   "550e8400-e29b-11d4-a716-446655440000": ["RULE-1", "RULE-2"],
-//   "6ba7b810-9dad-11d1-80b4-00c04fd430c8": ["RULE-2"],
-// }
+//
+//	{
+//	  "550e8400-e29b-11d4-a716-446655440000": ["RULE-1", "RULE-2"],
+//	  "6ba7b810-9dad-11d1-80b4-00c04fd430c8": ["RULE-2"],
+//	}
 type Hits map[string][]string
 
 // IDs returns the record ids of the hits
