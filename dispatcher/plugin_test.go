@@ -44,8 +44,10 @@ func TestPlugin(t *testing.T) {
 	submitOutput, err := dsp.Submit(context.Background(), &dispatcher.SubmitInput{
 		Records: []*api.Record{
 			{
-				ID: "12345", Data: map[string]interface{}{
-					"foo": "bar"},
+				ID: "12345",
+				Data: map[string]interface{}{
+					"foo": "bar",
+				},
 			},
 		},
 	})
