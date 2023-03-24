@@ -33,6 +33,15 @@ func (p *proxy) Entity(ctx context.Context, input *EntityInput) (*EntityOutput, 
 	return response, nil
 }
 
+func (p *proxy) EntityByRecord(ctx context.Context, input *EntityByRecordInput) (*EntityOutput, error) {
+	response := &EntityOutput{}
+	err := p.client.Call(ctx, entityByRecordMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 func (p *proxy) Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error) {
 	response := &SubmitOutput{}
 	err := p.client.Call(ctx, submitMethod, input, response)

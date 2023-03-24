@@ -3,8 +3,8 @@ module github.com/tilotech/tilores-plugin-api
 go 1.17
 
 require (
-	github.com/stretchr/testify v1.8.1
-	github.com/tilotech/go-plugin v0.1.0
+	github.com/stretchr/testify v1.8.2
+	github.com/tilotech/go-plugin v0.1.1-0.20230324155103-876751d53aab
 )
 
 require (

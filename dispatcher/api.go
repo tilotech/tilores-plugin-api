@@ -18,6 +18,7 @@ import (
 // customers side at a central place.
 type Dispatcher interface {
 	Entity(ctx context.Context, input *EntityInput) (*EntityOutput, error)
+	EntityByRecord(ctx context.Context, input *EntityByRecordInput) (*EntityOutput, error)
 	Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error)
 	Search(ctx context.Context, input *SearchInput) (*SearchOutput, error)
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
@@ -26,6 +27,11 @@ type Dispatcher interface {
 
 // EntityInput includes the data required to get an entity by its ID
 type EntityInput struct {
+	ID string `json:"id"`
+}
+
+// EntityByRecordInput includes the data required to get an entity by one of its record IDs
+type EntityByRecordInput struct {
 	ID string `json:"id"`
 }
 
