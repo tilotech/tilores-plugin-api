@@ -20,6 +20,7 @@ type provider struct {
 
 const (
 	entityMethod              = "/entity"
+	entityByRecordMethod      = "/entity-by-record"
 	submitMethod              = "/submit"
 	disassembleMethod         = "/disassemble"
 	removeConnectionBanMethod = "/removeconnectionban"
@@ -30,6 +31,8 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 	switch method {
 	case entityMethod:
 		return &EntityInput{}, p.Entity, nil
+	case entityByRecordMethod:
+		return &EntityByRecordInput{}, p.EntityByRecord, nil
 	case submitMethod:
 		return &SubmitInput{}, p.Submit, nil
 	case disassembleMethod:
@@ -44,6 +47,10 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 
 func (p *provider) Entity(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
 	return p.impl.Entity(ctx, params.(*EntityInput))
+}
+
+func (p *provider) EntityByRecord(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+	return p.impl.EntityByRecord(ctx, params.(*EntityByRecordInput))
 }
 
 func (p *provider) Submit(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {

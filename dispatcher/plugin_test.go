@@ -26,12 +26,17 @@ func TestPlugin(t *testing.T) {
 	defer cancel()
 	entityOutput, err := dsp.Entity(contextWithDeadline, &dispatcher.EntityInput{ID: "abcd"})
 	assert.NoError(t, err)
-	assert.NotNil(t, entityOutput)
+	require.NotNil(t, entityOutput)
 	assert.Equal(t, 1, len(entityOutput.Entity.Records))
 	assert.Equal(t, "bar", entityOutput.Entity.Records[0].Data["foo"])
 	assert.Equal(t, 1, len(entityOutput.Entity.Edges))
 	assert.Equal(t, 1, len(entityOutput.Entity.Duplicates))
 	assert.True(t, pluginImpl.deadlineExists)
+
+	entityByRecordOutput, err := dsp.EntityByRecord(contextWithDeadline, &dispatcher.EntityByRecordInput{ID: "12345"})
+	assert.NoError(t, err)
+	require.NotNil(t, entityByRecordOutput)
+	assert.Equal(t, entityOutput.Entity, entityByRecordOutput.Entity)
 
 	parameters := &api.SearchParameters{
 		"foo": "bar",
@@ -39,7 +44,7 @@ func TestPlugin(t *testing.T) {
 	searchOutput, err := dsp.Search(context.Background(), &dispatcher.SearchInput{Parameters: parameters})
 	assert.NoError(t, err)
 	assert.NotNil(t, searchOutput)
-	assert.Equal(t, 1, len(searchOutput.Entities))
+	require.Equal(t, 1, len(searchOutput.Entities))
 
 	submitOutput, err := dsp.Submit(context.Background(), &dispatcher.SubmitInput{
 		Records: []*api.Record{
@@ -117,6 +122,13 @@ var testEntity = api.Entity{
 }
 
 func (d *testDispatcher) Entity(ctx context.Context, _ *dispatcher.EntityInput) (*dispatcher.EntityOutput, error) {
+	_, d.deadlineExists = ctx.Deadline()
+	return &dispatcher.EntityOutput{
+		Entity: &testEntity,
+	}, nil
+}
+
+func (d *testDispatcher) EntityByRecord(ctx context.Context, _ *dispatcher.EntityByRecordInput) (*dispatcher.EntityOutput, error) {
 	_, d.deadlineExists = ctx.Deadline()
 	return &dispatcher.EntityOutput{
 		Entity: &testEntity,
