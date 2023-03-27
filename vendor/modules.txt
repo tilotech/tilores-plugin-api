@@ -8,7 +8,7 @@ github.com/pmezard/go-difflib/difflib
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/tilotech/go-plugin v0.1.1-0.20230324155103-876751d53aab
+# github.com/tilotech/go-plugin v0.1.1
 ## explicit; go 1.20
 github.com/tilotech/go-plugin
 # gopkg.in/yaml.v3 v3.0.1
