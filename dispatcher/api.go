@@ -27,12 +27,14 @@ type Dispatcher interface {
 
 // EntityInput includes the data required to get an entity by its ID
 type EntityInput struct {
-	ID string `json:"id"`
+	ID              string                 `json:"id"`
+	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
 }
 
 // EntityByRecordInput includes the data required to get an entity by one of its record IDs
 type EntityByRecordInput struct {
-	ID string `json:"id"`
+	ID              string                 `json:"id"`
+	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
 }
 
 // EntityOutput the output of Entity call
@@ -42,7 +44,8 @@ type EntityOutput struct {
 
 // SearchInput includes the search parameters
 type SearchInput struct {
-	Parameters *api.SearchParameters `json:"parameters"`
+	Parameters      *api.SearchParameters  `json:"parameters"`
+	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
 }
 
 // SearchOutput the output of Search call
