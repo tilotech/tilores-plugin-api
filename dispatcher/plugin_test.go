@@ -60,7 +60,6 @@ func TestPlugin(t *testing.T) {
 	assert.Equal(t, 1, submitOutput.RecordsAdded)
 
 	disassembleOutput, err := dsp.Disassemble(context.Background(), &dispatcher.DisassembleInput{
-		Reference: "123123",
 		Edges: []dispatcher.DisassembleEdge{
 			{
 				A: "abc",
@@ -71,14 +70,13 @@ func TestPlugin(t *testing.T) {
 			"12345",
 		},
 		CreateConnectionBan: true,
-		Meta: dispatcher.DisassembleMeta{
+		Meta: &dispatcher.DisassembleMeta{
 			User:   "someUser",
 			Reason: "someReason",
 		},
-		Timeout: nil,
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, []string{"abcd"}, disassembleOutput.EntityIDs)
+	assert.True(t, disassembleOutput.Triggered)
 
 	err = dsp.RemoveConnectionBan(context.Background(), &dispatcher.RemoveConnectionBanInput{
 		Reference: "123123",
@@ -151,9 +149,7 @@ func (d *testDispatcher) Submit(_ context.Context, _ *dispatcher.SubmitInput) (*
 
 func (d *testDispatcher) Disassemble(_ context.Context, _ *dispatcher.DisassembleInput) (*dispatcher.DisassembleOutput, error) {
 	return &dispatcher.DisassembleOutput{
-		DeletedEdges:   1,
-		DeletedRecords: 1,
-		EntityIDs:      []string{"abcd"},
+		Triggered: true,
 	}, nil
 }
 
