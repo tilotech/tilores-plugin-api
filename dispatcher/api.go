@@ -2,7 +2,6 @@ package dispatcher
 
 import (
 	"context"
-	"time"
 
 	api "github.com/tilotech/tilores-plugin-api"
 )
@@ -69,12 +68,10 @@ type SubmitOutput struct {
 // The metadata is required when disassemble is triggered by a real person,
 // Otherwise it MAY be omitted.
 type DisassembleInput struct {
-	Reference           string            `json:"reference"`
 	Edges               []DisassembleEdge `json:"edges"`
 	RecordIDs           []string          `json:"recordIDs"`
 	CreateConnectionBan bool              `json:"createConnectionBan"`
-	Meta                DisassembleMeta   `json:"meta"`
-	Timeout             *time.Duration    `json:"timeout"`
+	Meta                *DisassembleMeta  `json:"meta"`
 }
 
 // DisassembleEdge represents a single edge to be removed
@@ -92,9 +89,7 @@ type DisassembleMeta struct {
 // DisassembleOutput informs about removed records and edges as well as the
 // remaining entity ids
 type DisassembleOutput struct {
-	DeletedEdges   int32    `json:"deletedEdges"`
-	DeletedRecords int32    `json:"deletedRecords"`
-	EntityIDs      []string `json:"entityIDs"`
+	Triggered bool `json:"triggered"`
 }
 
 // RemoveConnectionBanInput contains the data required to remove a connection ban
