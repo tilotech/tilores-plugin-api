@@ -15,4 +15,5 @@ type Record struct {
 type RecordMeta struct {
 	SubmitTimestamp   *time.Time `json:"submitTimestamp"`
 	AssembleTimestamp *time.Time `json:"assembleTimestamp"`
+	Version           int        `json:"version"`
 }
