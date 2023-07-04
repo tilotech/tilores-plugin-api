@@ -1,6 +1,9 @@
 package api
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Record represents a part of an Entity and the corresponding predicates
 //
@@ -16,4 +19,13 @@ type RecordMeta struct {
 	SubmitTimestamp   *time.Time `json:"submitTimestamp"`
 	AssembleTimestamp *time.Time `json:"assembleTimestamp"`
 	Version           int        `json:"version"`
+}
+
+// IDWithVersion returns the records ID and its version in the format <id>:<version>.
+func (r *Record) IDWithVersion() string {
+	v := 0
+	if r.Meta != nil {
+		v = r.Meta.Version
+	}
+	return fmt.Sprintf("%v:%v", r.ID, v)
 }
