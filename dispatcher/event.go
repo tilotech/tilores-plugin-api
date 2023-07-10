@@ -18,11 +18,11 @@ import (
 // In case of type "DISASSEMBLE", the payload is a *dispatcher.DisassembleInput.
 //
 // For backwards compatibility, the old event input for assemble requests is
-// also supported. The output after unmarshaling will be the same as for type
+// also supported. The output after unmarshalling will be the same as for type
 // "ASSEMBLE".
 type AssembleEvent struct {
-	Type    string
-	Payload any
+	Type    string `json:"type"`
+	Payload any    `json:"payload"`
 }
 
 const (
