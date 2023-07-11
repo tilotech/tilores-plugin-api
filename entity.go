@@ -114,6 +114,24 @@ func ParseRecordID(recordID string) (string, int) {
 	return parts[0], version
 }
 
+// ParseRecordIDWithOptionalVersion parses the record id into its components.
+//
+// Return values are: id, version
+//
+// The recordID must be in the format: <id>:<version> or <id>
+// The behavior for other formats is undefined.
+func ParseRecordIDWithOptionalVersion(recordID string) (string, *int) {
+	parts := strings.SplitN(recordID, ":", 2)
+	if len(parts) == 1 {
+		return parts[0], nil
+	}
+	version, err := strconv.Atoi(parts[1])
+	if err != nil {
+		panic(err)
+	}
+	return parts[0], &version
+}
+
 // NewRecordID returns a new record id string with the provided id and version.
 //
 // The resulting string will be in the format: <id>:<version>

@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,19 @@ func TestParseRecordID(t *testing.T) {
 	id, version := api.ParseRecordID(rid)
 	assert.Equal(t, "foo", id)
 	assert.Equal(t, 9, version)
+}
+
+func TestParseRecordIDWithOptionalVersion(t *testing.T) {
+	rid := "foo"
+	id, version := api.ParseRecordIDWithOptionalVersion(rid)
+	assert.Equal(t, "foo", id)
+	assert.Nil(t, version)
+
+	rid = "foo:1"
+	id, version = api.ParseRecordIDWithOptionalVersion(rid)
+	assert.Equal(t, "foo", id)
+	require.NotNil(t, version)
+	assert.Equal(t, 1, *version)
 }
 
 func TestNewEdge(t *testing.T) {
