@@ -9,10 +9,10 @@ import (
 
 func TestIDWithVersion(t *testing.T) {
 	record := &api.Record{ID: "foo"}
-	assert.Equal(t, "foo:0", record.IDWithVersion())
+	assert.Equal(t, "foo", record.IDWithVersion())
 
 	record = &api.Record{ID: "foo", Meta: &api.RecordMeta{Version: 0}}
-	assert.Equal(t, "foo:0", record.IDWithVersion())
+	assert.Equal(t, "foo", record.IDWithVersion())
 
 	record = &api.Record{ID: "foo", Meta: &api.RecordMeta{Version: 1}}
 	assert.Equal(t, "foo:1", record.IDWithVersion())

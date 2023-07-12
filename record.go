@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -27,5 +26,5 @@ func (r *Record) IDWithVersion() string {
 	if r.Meta != nil {
 		v = r.Meta.Version
 	}
-	return fmt.Sprintf("%v:%v", r.ID, v)
+	return NewRecordID(r.ID, v)
 }
