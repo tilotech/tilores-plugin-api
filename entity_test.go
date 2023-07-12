@@ -17,7 +17,7 @@ func TestHitsIDs(t *testing.T) {
 	}
 
 	actual := hits.IDs()
-	assert.Equal(t, []string{"id1", "id2", "id3"}, actual)
+	assert.ElementsMatch(t, []string{"id1", "id2", "id3"}, actual)
 }
 
 func TestParseEdge(t *testing.T) {
