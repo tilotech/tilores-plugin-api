@@ -45,6 +45,8 @@ type EntityOutput struct {
 type SearchInput struct {
 	Parameters      *api.SearchParameters  `json:"parameters"`
 	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
+	Page            *int                   `json:"page"`
+	PageSize        *int                   `json:"pageSize"`
 }
 
 // SearchOutput the output of Search call
