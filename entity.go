@@ -8,11 +8,12 @@ import (
 
 // Entity represents a real world object
 type Entity struct {
-	ID         string     `json:"id"`
-	Records    []*Record  `json:"records"`
-	Edges      Edges      `json:"edges"`
-	Duplicates Duplicates `json:"duplicates"`
-	Hits       Hits       `json:"hits"`
+	ID          string     `json:"id"`
+	Records     []*Record  `json:"records"`
+	Edges       Edges      `json:"edges"`
+	Duplicates  Duplicates `json:"duplicates"`
+	Hits        Hits       `json:"hits"`
+	Consistency float64    `json:"consistency"`
 }
 
 // Edges represents a connection between two Records
