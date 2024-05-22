@@ -43,10 +43,11 @@ type EntityOutput struct {
 
 // SearchInput includes the search parameters
 type SearchInput struct {
-	Parameters      *api.SearchParameters  `json:"parameters"`
-	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
-	Page            *int                   `json:"page"`
-	PageSize        *int                   `json:"pageSize"`
+	Parameters        *api.SearchParameters  `json:"parameters"`
+	ConsiderRecords   []*api.FilterCondition `json:"considerRecords"`
+	Page              *int                   `json:"page"`
+	PageSize          *int                   `json:"pageSize"`
+	SimulateIngestion bool                   `json:"simulateIngestion"`
 }
 
 // SearchOutput the output of Search call
