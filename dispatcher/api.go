@@ -47,7 +47,7 @@ type SearchInput struct {
 	ConsiderRecords   []*api.FilterCondition `json:"considerRecords"`
 	Page              *int                   `json:"page"`
 	PageSize          *int                   `json:"pageSize"`
-	SimulateIngestion bool                   `json:"simulateIngestion"`
+	SimulateIngestion *bool                  `json:"simulateIngestion"`
 }
 
 // SearchOutput the output of Search call
