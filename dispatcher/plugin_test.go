@@ -59,6 +59,20 @@ func TestPlugin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, submitOutput.RecordsAdded)
 
+	submitWithPreviewOutput, err := dsp.SubmitWithPreview(context.Background(), &dispatcher.SubmitWithPreviewInput{
+		Records: []*api.Record{
+			{
+				ID: "12345",
+				Data: map[string]interface{}{
+					"foo": "bar",
+				},
+			},
+		},
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, submitWithPreviewOutput)
+	assert.Len(t, submitWithPreviewOutput.Preview.Entities, 1)
+
 	disassembleOutput, err := dsp.Disassemble(context.Background(), &dispatcher.DisassembleInput{
 		Edges: []dispatcher.DisassembleEdge{
 			{
@@ -144,6 +158,19 @@ func (d *testDispatcher) Search(_ context.Context, _ *dispatcher.SearchInput) (*
 func (d *testDispatcher) Submit(_ context.Context, _ *dispatcher.SubmitInput) (*dispatcher.SubmitOutput, error) {
 	return &dispatcher.SubmitOutput{
 		RecordsAdded: 1,
+	}, nil
+}
+
+func (d *testDispatcher) SubmitWithPreview(ctx context.Context, input *dispatcher.SubmitWithPreviewInput) (*dispatcher.SubmitWithPreviewOutput, error) {
+	return &dispatcher.SubmitWithPreviewOutput{
+		Preview: dispatcher.SubmissionPreview{
+			Entities: []*api.Entity{
+				&testEntity,
+			},
+			NewRecords:     nil,
+			UpdatedRecords: []string{"12345"},
+			IgnoredRecords: nil,
+		},
 	}, nil
 }
 

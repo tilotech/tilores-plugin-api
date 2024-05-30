@@ -19,6 +19,7 @@ type Dispatcher interface {
 	Entity(ctx context.Context, input *EntityInput) (*EntityOutput, error)
 	EntityByRecord(ctx context.Context, input *EntityByRecordInput) (*EntityOutput, error)
 	Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error)
+	SubmitWithPreview(ctx context.Context, input *SubmitWithPreviewInput) (*SubmitWithPreviewOutput, error)
 	Search(ctx context.Context, input *SearchInput) (*SearchOutput, error)
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
@@ -43,11 +44,10 @@ type EntityOutput struct {
 
 // SearchInput includes the search parameters
 type SearchInput struct {
-	Parameters        *api.SearchParameters  `json:"parameters"`
-	ConsiderRecords   []*api.FilterCondition `json:"considerRecords"`
-	Page              *int                   `json:"page"`
-	PageSize          *int                   `json:"pageSize"`
-	SimulateIngestion *bool                  `json:"simulateIngestion"`
+	Parameters      *api.SearchParameters  `json:"parameters"`
+	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
+	Page            *int                   `json:"page"`
+	PageSize        *int                   `json:"pageSize"`
 }
 
 // SearchOutput the output of Search call
@@ -64,6 +64,38 @@ type SubmitInput struct {
 // data submission.
 type SubmitOutput struct {
 	RecordsAdded int `json:"recordsAdded"`
+}
+
+// SubmitWithPreviewInput includes the data required to submit and possible options.
+//
+// DryRun option ensures that no data is ingested, only that the preview is provided.
+type SubmitWithPreviewInput struct {
+	Records []*api.Record `json:"records"`
+	DryRun  *bool         `json:"dryRun"`
+}
+
+// SubmitWithPreviewOutput provides a preview of how the data could potentially
+// look like if/when ingested.
+type SubmitWithPreviewOutput struct {
+	Preview SubmissionPreview `json:"preview"`
+}
+
+// SubmissionPreview a preview of how the data could potentially
+// look like if/when submitted.
+//
+// Entities a list of entities where the provided records reside.
+//
+// NewRecords a list of record IDs that where newly added to resulting Entities.
+//
+// UpdatedRecords a list of record IDs that where updated in resulting Entities.
+//
+// IgnoredRecords a list of record IDs that where ignored and not/will not be
+// ingested. This is only relevant in case record updates are not enabled.
+type SubmissionPreview struct {
+	Entities       []*api.Entity `json:"entities"`
+	NewRecords     []string      `json:"newRecords"`
+	UpdatedRecords []string      `json:"updatedRecords"`
+	IgnoredRecords []string      `json:"ignoredRecords"`
 }
 
 // DisassembleInput is the data required to remove one or more edges or even records
