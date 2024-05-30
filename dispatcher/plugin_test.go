@@ -163,7 +163,7 @@ func (d *testDispatcher) Submit(_ context.Context, _ *dispatcher.SubmitInput) (*
 
 func (d *testDispatcher) SubmitWithPreview(ctx context.Context, input *dispatcher.SubmitWithPreviewInput) (*dispatcher.SubmitWithPreviewOutput, error) {
 	return &dispatcher.SubmitWithPreviewOutput{
-		Preview: dispatcher.SubmissionPreview{
+		Preview: api.SubmissionPreview{
 			Entities: []*api.Entity{
 				&testEntity,
 			},
