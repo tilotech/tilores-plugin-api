@@ -71,7 +71,7 @@ func TestPlugin(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, submitWithPreviewOutput)
-	assert.Len(t, submitWithPreviewOutput.Preview.Entities, 1)
+	assert.Len(t, submitWithPreviewOutput.Entities, 1)
 
 	disassembleOutput, err := dsp.Disassemble(context.Background(), &dispatcher.DisassembleInput{
 		Edges: []dispatcher.DisassembleEdge{
@@ -163,13 +163,8 @@ func (d *testDispatcher) Submit(_ context.Context, _ *dispatcher.SubmitInput) (*
 
 func (d *testDispatcher) SubmitWithPreview(ctx context.Context, input *dispatcher.SubmitWithPreviewInput) (*dispatcher.SubmitWithPreviewOutput, error) {
 	return &dispatcher.SubmitWithPreviewOutput{
-		Preview: api.SubmissionPreview{
-			Entities: []*api.Entity{
-				&testEntity,
-			},
-			NewRecords:     nil,
-			UpdatedRecords: []string{"12345"},
-			IgnoredRecords: nil,
+		Entities: []*api.Entity{
+			&testEntity,
 		},
 	}, nil
 }

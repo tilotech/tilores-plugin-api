@@ -77,7 +77,7 @@ type SubmitWithPreviewInput struct {
 // SubmitWithPreviewOutput provides a preview of how the data could potentially
 // look like if/when ingested.
 type SubmitWithPreviewOutput struct {
-	Preview api.SubmissionPreview `json:"preview"`
+	Entities []*api.Entity `json:"entities"`
 }
 
 // DisassembleInput is the data required to remove one or more edges or even records
