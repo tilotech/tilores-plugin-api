@@ -22,6 +22,7 @@ const (
 	entityMethod              = "/entity"
 	entityByRecordMethod      = "/entity-by-record"
 	submitMethod              = "/submit"
+	submitWithPreviewMethod   = "/submit-with-preview"
 	disassembleMethod         = "/disassemble"
 	removeConnectionBanMethod = "/removeconnectionban"
 	searchMethod              = "/search"
@@ -35,6 +36,8 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 		return &EntityByRecordInput{}, p.EntityByRecord, nil
 	case submitMethod:
 		return &SubmitInput{}, p.Submit, nil
+	case submitWithPreviewMethod:
+		return &SubmitWithPreviewInput{}, p.SubmitWithPreview, nil
 	case disassembleMethod:
 		return &DisassembleInput{}, p.Disassemble, nil
 	case removeConnectionBanMethod:
@@ -55,6 +58,10 @@ func (p *provider) EntityByRecord(ctx context.Context, params plugin.RequestPara
 
 func (p *provider) Submit(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
 	return p.impl.Submit(ctx, params.(*SubmitInput))
+}
+
+func (p *provider) SubmitWithPreview(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+	return p.impl.SubmitWithPreview(ctx, params.(*SubmitWithPreviewInput))
 }
 
 func (p *provider) Disassemble(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {

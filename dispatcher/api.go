@@ -19,6 +19,7 @@ type Dispatcher interface {
 	Entity(ctx context.Context, input *EntityInput) (*EntityOutput, error)
 	EntityByRecord(ctx context.Context, input *EntityByRecordInput) (*EntityOutput, error)
 	Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, error)
+	SubmitWithPreview(ctx context.Context, input *SubmitWithPreviewInput) (*SubmitWithPreviewOutput, error)
 	Search(ctx context.Context, input *SearchInput) (*SearchOutput, error)
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
@@ -63,6 +64,20 @@ type SubmitInput struct {
 // data submission.
 type SubmitOutput struct {
 	RecordsAdded int `json:"recordsAdded"`
+}
+
+// SubmitWithPreviewInput includes the data required to submit and possible options.
+//
+// DryRun option ensures that no data is ingested, only that the preview is provided.
+type SubmitWithPreviewInput struct {
+	Records []*api.Record `json:"records"`
+	DryRun  *bool         `json:"dryRun"`
+}
+
+// SubmitWithPreviewOutput provides a preview of how the data could potentially
+// look like if/when ingested.
+type SubmitWithPreviewOutput struct {
+	Entities []*api.Entity `json:"entities"`
 }
 
 // DisassembleInput is the data required to remove one or more edges or even records

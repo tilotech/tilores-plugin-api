@@ -51,6 +51,15 @@ func (p *proxy) Submit(ctx context.Context, input *SubmitInput) (*SubmitOutput, 
 	return response, nil
 }
 
+func (p *proxy) SubmitWithPreview(ctx context.Context, input *SubmitWithPreviewInput) (*SubmitWithPreviewOutput, error) {
+	response := &SubmitWithPreviewOutput{}
+	err := p.client.Call(ctx, submitWithPreviewMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 func (p *proxy) Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error) {
 	response := &DisassembleOutput{}
 	err := p.client.Call(ctx, disassembleMethod, input, response)
