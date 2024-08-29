@@ -14,6 +14,7 @@ type Entity struct {
 	Duplicates  Duplicates `json:"duplicates"`
 	Hits        Hits       `json:"hits"`
 	Consistency float64    `json:"consistency"`
+	Score       uint8      `json:"score"`
 }
 
 // Edges represents a connection between two Records
@@ -69,20 +70,31 @@ func (h Hits) IDs() []string {
 // <id>:<version>:<id>:<version>:<rule> or <id>:<id>:<rule>
 // If the version information is not provided, then version 0 is assumed.
 // The behavior for other formats is undefined.
-func ParseEdge(edge string) (string, string, string) {
-	parts := strings.SplitN(edge, ":", 5)
+func ParseEdge(edge string) (string, string, string, uint8) {
+	parts := strings.SplitN(edge, ":", 6)
 	var id1, id2, rule string
 	var v1, v2 int
-	if len(parts) == 3 {
+	var score uint8
+	switch len(parts) {
+	case 3:
 		id1, v1 = ParseRecordID(parts[0])
 		id2, v2 = ParseRecordID(parts[1])
 		rule = parts[2]
-	} else {
+		score = 100
+	case 5:
 		id1, v1 = ParseRecordID(fmt.Sprintf("%v:%v", parts[0], parts[1]))
 		id2, v2 = ParseRecordID(fmt.Sprintf("%v:%v", parts[2], parts[3]))
 		rule = parts[4]
+		score = 100
+	default:
+		id1, v1 = ParseRecordID(fmt.Sprintf("%v:%v", parts[0], parts[1]))
+		id2, v2 = ParseRecordID(fmt.Sprintf("%v:%v", parts[2], parts[3]))
+		rule = parts[4]
+		if s, err := strconv.ParseUint(parts[5], 10, 8); err == nil {
+			score = uint8(s)
+		}
 	}
-	return NewRecordID(id1, v1), NewRecordID(id2, v2), rule
+	return NewRecordID(id1, v1), NewRecordID(id2, v2), rule, score
 }
 
 // NewEdge returns a new edge string with the provided IDs and versions.
@@ -90,20 +102,24 @@ func ParseEdge(edge string) (string, string, string) {
 // id1 and id2 must be in the format: <id>:<version> or <id>
 // If id1 or id2 is in the format <id>, then the version 0 is assumed.
 //
-// The resulting string will be in the format: <id>:<version>:<id>:<version>:<rule>
-func NewEdge(id1, id2, rule string) string {
+// score must be a value between 0 and 100 (both including).
+//
+// The resulting string will be in the format: <id>:<version>:<id>:<version>:<rule>:<score>
+func NewEdge(id1, id2, rule string, score uint8) string {
 	id1, v1 := ParseRecordID(id1)
 	id2, v2 := ParseRecordID(id2)
-	return NewEdgeWithVersions(id1, v1, id2, v2, rule)
+	return NewEdgeWithVersions(id1, v1, id2, v2, rule, score)
 }
 
 // NewEdgeWithVersions returns a new edge string with the provided IDs and versions.
 //
 // id1 and id2 must be the plain record ID without a version.
 //
+// score must be a value between 0 and 100 (both including).
+//
 // The resulting string will be in the format: <id>:<version>:<id>:<version>:<rule>
-func NewEdgeWithVersions(id1 string, v1 int, id2 string, v2 int, rule string) string {
-	return fmt.Sprintf("%v:%v:%v:%v:%v", id1, v1, id2, v2, rule)
+func NewEdgeWithVersions(id1 string, v1 int, id2 string, v2 int, rule string, score uint8) string {
+	return fmt.Sprintf("%v:%v:%v:%v:%v:%v", id1, v1, id2, v2, rule, score)
 }
 
 // ParseDuplicateKey parses the key (original) of a duplicate into its components.

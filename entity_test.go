@@ -21,17 +21,33 @@ func TestHitsIDs(t *testing.T) {
 }
 
 func TestParseEdge(t *testing.T) {
-	edge := "id1:0:id2:9:R1"
-	a, b, rule := api.ParseEdge(edge)
+	edge := "id1:0:id2:9:R1:56"
+	a, b, rule, score := api.ParseEdge(edge)
 	assert.Equal(t, "id1", a)
 	assert.Equal(t, "id2:9", b)
 	assert.Equal(t, "R1", rule)
+	assert.Equal(t, uint8(56), score)
+
+	edge = "id1:0:id2:9:R1"
+	a, b, rule, score = api.ParseEdge(edge)
+	assert.Equal(t, "id1", a)
+	assert.Equal(t, "id2:9", b)
+	assert.Equal(t, "R1", rule)
+	assert.Equal(t, uint8(100), score)
 
 	edge = "id1:id2:R1"
-	a, b, rule = api.ParseEdge(edge)
+	a, b, rule, score = api.ParseEdge(edge)
 	assert.Equal(t, "id1", a)
 	assert.Equal(t, "id2", b)
 	assert.Equal(t, "R1", rule)
+	assert.Equal(t, uint8(100), score)
+
+	edge = "id1:0:id2:9:R1:invalid"
+	a, b, rule, score = api.ParseEdge(edge)
+	assert.Equal(t, "id1", a)
+	assert.Equal(t, "id2:9", b)
+	assert.Equal(t, "R1", rule)
+	assert.Equal(t, uint8(0), score)
 }
 
 func TestParseDuplicateKey(t *testing.T) {
@@ -98,17 +114,17 @@ func TestParseRecordIDWithOptionalVersion(t *testing.T) {
 }
 
 func TestNewEdge(t *testing.T) {
-	actual := api.NewEdge("foo:1", "bar:2", "R1")
-	assert.Equal(t, "foo:1:bar:2:R1", actual)
+	actual := api.NewEdge("foo:1", "bar:2", "R1", 100)
+	assert.Equal(t, "foo:1:bar:2:R1:100", actual)
 
-	actual = api.NewEdge("foo", "bar:2", "R1")
-	assert.Equal(t, "foo:0:bar:2:R1", actual)
+	actual = api.NewEdge("foo", "bar:2", "R1", 98)
+	assert.Equal(t, "foo:0:bar:2:R1:98", actual)
 
-	actual = api.NewEdge("foo", "bar", "R1")
-	assert.Equal(t, "foo:0:bar:0:R1", actual)
+	actual = api.NewEdge("foo", "bar", "R1", 0)
+	assert.Equal(t, "foo:0:bar:0:R1:0", actual)
 
-	actual = api.NewEdgeWithVersions("foo", 1, "bar", 2, "R2")
-	assert.Equal(t, "foo:1:bar:2:R2", actual)
+	actual = api.NewEdgeWithVersions("foo", 1, "bar", 2, "R2", 34)
+	assert.Equal(t, "foo:1:bar:2:R2:34", actual)
 }
 
 func TestNewDuplicateKey(t *testing.T) {
