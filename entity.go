@@ -14,7 +14,7 @@ type Entity struct {
 	Duplicates  Duplicates `json:"duplicates"`
 	Hits        Hits       `json:"hits"`
 	Consistency float64    `json:"consistency"`
-	Score       uint8      `json:"score"`
+	Score       float64    `json:"score"`
 }
 
 // Edges represents a connection between two Records
