@@ -15,6 +15,7 @@ type Entity struct {
 	Hits        Hits       `json:"hits"`
 	Consistency float64    `json:"consistency"`
 	Score       float64    `json:"score"`
+	HitScore    float64    `json:"hitScore"`
 }
 
 // Edges represents a connection between two Records
@@ -67,8 +68,10 @@ func (h Hits) IDs() []string {
 // Both id1 and id2 are record IDs as defined by NewRecordID.
 //
 // The edge string must be in the format:
+// <id>:<version>:<id>:<version>:<rule><score>,
 // <id>:<version>:<id>:<version>:<rule> or <id>:<id>:<rule>
 // If the version information is not provided, then version 0 is assumed.
+// If the score is not provided, then score 100 is assumed.
 // The behavior for other formats is undefined.
 func ParseEdge(edge string) (string, string, string, uint8) {
 	parts := strings.SplitN(edge, ":", 6)
@@ -117,7 +120,7 @@ func NewEdge(id1, id2, rule string, score uint8) string {
 //
 // score must be a value between 0 and 100 (both including).
 //
-// The resulting string will be in the format: <id>:<version>:<id>:<version>:<rule>
+// The resulting string will be in the format: <id>:<version>:<id>:<version>:<rule>:<score>
 func NewEdgeWithVersions(id1 string, v1 int, id2 string, v2 int, rule string, score uint8) string {
 	return fmt.Sprintf("%v:%v:%v:%v:%v:%v", id1, v1, id2, v2, rule, score)
 }
