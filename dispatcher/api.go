@@ -29,12 +29,14 @@ type Dispatcher interface {
 type EntityInput struct {
 	ID              string                 `json:"id"`
 	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
+	Features        api.Features           `json:"features"`
 }
 
 // EntityByRecordInput includes the data required to get an entity by one of its record IDs
 type EntityByRecordInput struct {
 	ID              string                 `json:"id"`
 	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
+	Features        api.Features           `json:"features"`
 }
 
 // EntityOutput the output of Entity call
@@ -49,6 +51,7 @@ type SearchInput struct {
 	Page            *int                   `json:"page"`
 	PageSize        *int                   `json:"pageSize"`
 	SearchRules     *string                `json:"searchRules"`
+	Features        api.Features           `json:"features"`
 }
 
 // SearchOutput the output of Search call
@@ -71,8 +74,9 @@ type SubmitOutput struct {
 //
 // DryRun option ensures that no data is ingested, only that the preview is provided.
 type SubmitWithPreviewInput struct {
-	Records []*api.Record `json:"records"`
-	DryRun  *bool         `json:"dryRun"`
+	Records  []*api.Record `json:"records"`
+	DryRun   *bool         `json:"dryRun"`
+	Features api.Features  `json:"features"`
 }
 
 // SubmitWithPreviewOutput provides a preview of how the data could potentially
