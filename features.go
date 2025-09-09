@@ -7,4 +7,5 @@ package api
 // The feature is considered active in case of nil, missing value and explicit true.
 type Features struct {
 	EntityConsistency *bool `json:"entityConsistency"`
+	EntityHitScore    *bool `json:"entityHitScore"`
 }
