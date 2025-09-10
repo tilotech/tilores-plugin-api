@@ -48,8 +48,36 @@ type SearchInput struct {
 	ConsiderRecords []*api.FilterCondition `json:"considerRecords"`
 	Page            *int                   `json:"page"`
 	PageSize        *int                   `json:"pageSize"`
+	Sort            *EntitySortCriteria    `json:"sort"`
 	SearchRules     *string                `json:"searchRules"`
 }
+
+// EntitySortCriteria defines the criteria to sort the entity results during
+// search.
+type EntitySortCriteria struct {
+	Field     EntitySortField      `json:"field"`
+	Direction *EntitySortDirection `json:"direction"`
+}
+
+// EntitySortField defines the properties that entities can be sorted by.
+type EntitySortField string
+
+const (
+	// SortEntityByID sorts entities by their id property (ascending by default).
+	SortEntityByID EntitySortField = "id"
+	// SortEntityByHitScore sorts entities by their hit score (descending by default).
+	SortEntityByHitScore EntitySortField = "hitScore"
+)
+
+// EntitySortDirection defines the sort direction during entity sorting.
+type EntitySortDirection string
+
+const (
+	// SortEntityAscending sorts in ascending order.
+	SortEntityAscending EntitySortDirection = "ASC"
+	// SortEntityDescending sorts in descending order.
+	SortEntityDescending EntitySortDirection = "DESC"
+)
 
 // SearchOutput the output of Search call
 type SearchOutput struct {
