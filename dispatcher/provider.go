@@ -26,6 +26,7 @@ const (
 	disassembleMethod         = "/disassemble"
 	removeConnectionBanMethod = "/removeconnectionban"
 	searchMethod              = "/search"
+	assemblyStatusMethod      = "/assembly-status"
 )
 
 func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.InvokeFunc, error) {
@@ -44,34 +45,40 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 		return &RemoveConnectionBanInput{}, p.RemoveConnectionBan, nil
 	case searchMethod:
 		return &SearchInput{}, p.Search, nil
+	case assemblyStatusMethod:
+		return nil, p.AssemblyStatus, nil
 	}
 	return nil, nil, fmt.Errorf("invalid method %v", method)
 }
 
-func (p *provider) Entity(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) Entity(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.Entity(ctx, params.(*EntityInput))
 }
 
-func (p *provider) EntityByRecord(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) EntityByRecord(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.EntityByRecord(ctx, params.(*EntityByRecordInput))
 }
 
-func (p *provider) Submit(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) Submit(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.Submit(ctx, params.(*SubmitInput))
 }
 
-func (p *provider) SubmitWithPreview(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) SubmitWithPreview(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.SubmitWithPreview(ctx, params.(*SubmitWithPreviewInput))
 }
 
-func (p *provider) Disassemble(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) Disassemble(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.Disassemble(ctx, params.(*DisassembleInput))
 }
 
-func (p *provider) RemoveConnectionBan(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) RemoveConnectionBan(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return nil, p.impl.RemoveConnectionBan(ctx, params.(*RemoveConnectionBanInput))
 }
 
-func (p *provider) Search(ctx context.Context, params plugin.RequestParameter) (interface{}, error) {
+func (p *provider) Search(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.Search(ctx, params.(*SearchInput))
+}
+
+func (p *provider) AssemblyStatus(ctx context.Context, _ plugin.RequestParameter) (any, error) {
+	return p.impl.AssemblyStatus(ctx)
 }

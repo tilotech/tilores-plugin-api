@@ -23,6 +23,7 @@ type Dispatcher interface {
 	Search(ctx context.Context, input *SearchInput) (*SearchOutput, error)
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
+	AssemblyStatus(ctx context.Context) (*AssemblyStatusOutput, error)
 }
 
 // EntityInput includes the data required to get an entity by its ID
@@ -155,3 +156,19 @@ type RemoveConnectionBanMeta struct {
 	User   string `json:"user"`
 	Reason string `json:"reason"`
 }
+
+// AssemblyStatusOutput provides information about the current assembly status.
+type AssemblyStatusOutput struct {
+	State                  AssemblyState `json:"state"`
+	EstimatedTimeRemaining *int          `json:"estimatedTimeRemaining"`
+}
+
+// AssemblyState represents the state of the assembly.
+type AssemblyState string
+
+const (
+	// AssemblyStateReady indicates the lack of unassembled records.
+	AssemblyStateReady AssemblyState = "READY"
+	// AssemblyStateInProgress indicates the presence of unassembled records.
+	AssemblyStateInProgress AssemblyState = "IN_PROGRESS"
+)

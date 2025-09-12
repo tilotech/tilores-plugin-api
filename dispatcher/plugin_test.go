@@ -50,7 +50,7 @@ func TestPlugin(t *testing.T) {
 		Records: []*api.Record{
 			{
 				ID: "12345",
-				Data: map[string]interface{}{
+				Data: map[string]any{
 					"foo": "bar",
 				},
 			},
@@ -63,7 +63,7 @@ func TestPlugin(t *testing.T) {
 		Records: []*api.Record{
 			{
 				ID: "12345",
-				Data: map[string]interface{}{
+				Data: map[string]any{
 					"foo": "bar",
 				},
 			},
@@ -103,6 +103,12 @@ func TestPlugin(t *testing.T) {
 	})
 	assert.Error(t, err)
 	assert.Equal(t, "forced remove connection ban error", err.Error())
+
+	assemblyStatusOutput, err := dsp.AssemblyStatus(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, dispatcher.AssemblyStateInProgress, assemblyStatusOutput.State)
+	require.NotNil(t, assemblyStatusOutput.EstimatedTimeRemaining)
+	assert.Equal(t, 100, *assemblyStatusOutput.EstimatedTimeRemaining)
 }
 
 type testDispatcher struct {
@@ -114,7 +120,7 @@ var testEntity = api.Entity{
 	Records: []*api.Record{
 		{
 			ID: "12345",
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"foo": "bar",
 			},
 		},
@@ -177,4 +183,12 @@ func (d *testDispatcher) Disassemble(_ context.Context, _ *dispatcher.Disassembl
 
 func (d *testDispatcher) RemoveConnectionBan(_ context.Context, _ *dispatcher.RemoveConnectionBanInput) error {
 	return fmt.Errorf("forced remove connection ban error")
+}
+
+func (d *testDispatcher) AssemblyStatus(_ context.Context) (*dispatcher.AssemblyStatusOutput, error) {
+	t := 100
+	return &dispatcher.AssemblyStatusOutput{
+		State:                  dispatcher.AssemblyStateInProgress,
+		EstimatedTimeRemaining: &t,
+	}, nil
 }
