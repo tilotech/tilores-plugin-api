@@ -7,4 +7,4 @@ package api
 // is no further defined how the parameters may look like. For this reason, the
 // SearchParameters must only be used in combination with matching rules that
 // know how to access the relevant properties.
-type SearchParameters map[string]interface{}
+type SearchParameters map[string]any

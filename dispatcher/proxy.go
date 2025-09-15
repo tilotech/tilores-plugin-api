@@ -70,13 +70,22 @@ func (p *proxy) Disassemble(ctx context.Context, input *DisassembleInput) (*Disa
 }
 
 func (p *proxy) RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error {
-	var response interface{}
+	var response any
 	return p.client.Call(ctx, removeConnectionBanMethod, input, response)
 }
 
 func (p *proxy) Search(ctx context.Context, input *SearchInput) (*SearchOutput, error) {
 	response := &SearchOutput{}
 	err := p.client.Call(ctx, searchMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (p *proxy) AssemblyStatus(ctx context.Context) (*AssemblyStatusOutput, error) {
+	response := &AssemblyStatusOutput{}
+	err := p.client.Call(ctx, assemblyStatusMethod, nil, response)
 	if err != nil {
 		return nil, err
 	}
