@@ -85,7 +85,8 @@ const (
 
 // SearchOutput the output of Search call
 type SearchOutput struct {
-	Entities []*api.Entity `json:"entities"`
+	Entities   []*api.Entity `json:"entities"`
+	TotalCount int           `json:"totalCount"`
 }
 
 // SubmitInput includes the data required to submit
