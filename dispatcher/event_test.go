@@ -88,6 +88,33 @@ func TestUnmarshalEvent(t *testing.T) {
 				},
 			},
 		},
+		"assemble with force record update flag": {
+			input: `
+				{
+					"type": "ASSEMBLE",
+					"payload": [
+						{
+							"id": "foo",
+							"data": {
+								"key": "value"
+							}
+						}
+					],
+					"flags": ["FORCE_RECORD_UPDATE"]
+				}`,
+			expected: &dispatcher.AssembleEvent{
+				Type: "ASSEMBLE",
+				Payload: []*api.Record{
+					{
+						ID: "foo",
+						Data: map[string]any{
+							"key": "value",
+						},
+					},
+				},
+				Flags: []dispatcher.AssembleEventFlag{dispatcher.ForceRecordUpdate},
+			},
+		},
 		"invalid json": {
 			input:       `{invalid json`,
 			expectError: true,
