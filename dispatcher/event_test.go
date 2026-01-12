@@ -88,7 +88,7 @@ func TestUnmarshalEvent(t *testing.T) {
 				},
 			},
 		},
-		"assemble with force record update flag": {
+		"assemble with state rectification flag": {
 			input: `
 				{
 					"type": "ASSEMBLE",
@@ -100,7 +100,7 @@ func TestUnmarshalEvent(t *testing.T) {
 							}
 						}
 					],
-					"flags": ["FORCE_RECORD_UPDATE"]
+					"flags": ["STATE_RECTIFICATION"]
 				}`,
 			expected: &dispatcher.AssembleEvent{
 				Type: "ASSEMBLE",
@@ -112,7 +112,7 @@ func TestUnmarshalEvent(t *testing.T) {
 						},
 					},
 				},
-				Flags: []dispatcher.AssembleEventFlag{dispatcher.ForceRecordUpdate},
+				Flags: []dispatcher.AssembleEventFlag{dispatcher.StateRectification},
 			},
 		},
 		"invalid json": {
