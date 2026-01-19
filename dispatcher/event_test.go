@@ -88,6 +88,33 @@ func TestUnmarshalEvent(t *testing.T) {
 				},
 			},
 		},
+		"assemble with state rectification flag": {
+			input: `
+				{
+					"type": "ASSEMBLE",
+					"payload": [
+						{
+							"id": "foo",
+							"data": {
+								"key": "value"
+							}
+						}
+					],
+					"flags": ["STATE_RECTIFICATION"]
+				}`,
+			expected: &dispatcher.AssembleEvent{
+				Type: "ASSEMBLE",
+				Payload: []*api.Record{
+					{
+						ID: "foo",
+						Data: map[string]any{
+							"key": "value",
+						},
+					},
+				},
+				Flags: []dispatcher.AssembleEventFlag{dispatcher.StateRectification},
+			},
+		},
 		"invalid json": {
 			input:       `{invalid json`,
 			expectError: true,
