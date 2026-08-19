@@ -91,3 +91,39 @@ func (p *proxy) AssemblyStatus(ctx context.Context) (*AssemblyStatusOutput, erro
 	}
 	return response, nil
 }
+
+func (p *proxy) ReviewCases(ctx context.Context, input *ReviewCasesInput) (*ReviewCasesOutput, error) {
+	response := &ReviewCasesOutput{}
+	err := p.client.Call(ctx, reviewCasesMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (p *proxy) ClaimReviewCase(ctx context.Context, input *ClaimReviewCaseInput) (*ClaimReviewCaseOutput, error) {
+	response := &ClaimReviewCaseOutput{}
+	err := p.client.Call(ctx, claimReviewCaseMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (p *proxy) ReleaseReviewCase(ctx context.Context, input *ReleaseReviewCaseInput) (*ReleaseReviewCaseOutput, error) {
+	response := &ReleaseReviewCaseOutput{}
+	err := p.client.Call(ctx, releaseReviewCaseMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (p *proxy) ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseInput) (*ResolveReviewCaseOutput, error) {
+	response := &ResolveReviewCaseOutput{}
+	err := p.client.Call(ctx, resolveReviewCaseMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
