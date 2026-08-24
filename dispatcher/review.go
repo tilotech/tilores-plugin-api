@@ -116,18 +116,22 @@ type ReleaseReviewCaseOutput struct {
 	Released bool `json:"released"`
 }
 
-// ReviewCandidateVerdict is the decision for a single candidate of a case.
-type ReviewCandidateVerdict struct {
-	EntityID string `json:"entityID"`
-	Keep     bool   `json:"keep"`
+// ReviewLinkVerdict is the decision for a single link of a case.
+//
+// The link is addressed by the pair of records it connects, which is its
+// natural key, and the order of the two does not matter.
+type ReviewLinkVerdict struct {
+	A    string `json:"a"`
+	B    string `json:"b"`
+	Keep bool   `json:"keep"`
 }
 
 // ResolveReviewCaseInput provides the verdicts for a claimed case.
 type ResolveReviewCaseInput struct {
-	ID       string                   `json:"id"`
-	Verdicts []ReviewCandidateVerdict `json:"verdicts"`
-	Actor    ReviewActor              `json:"actor"`
-	Reason   string                   `json:"reason"`
+	ID       string              `json:"id"`
+	Verdicts []ReviewLinkVerdict `json:"verdicts"`
+	Actor    ReviewActor         `json:"actor"`
+	Reason   string              `json:"reason"`
 }
 
 // ResolveReviewCaseOutput reports whether the resolution triggered a

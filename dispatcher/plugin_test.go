@@ -140,10 +140,11 @@ func TestPlugin(t *testing.T) {
 
 	resolveOutput, err := dsp.ResolveReviewCase(context.Background(), &dispatcher.ResolveReviewCaseInput{
 		ID: "someCase",
-		Verdicts: []dispatcher.ReviewCandidateVerdict{
+		Verdicts: []dispatcher.ReviewLinkVerdict{
 			{
-				EntityID: "someEntity",
-				Keep:     false,
+				A:    "someRecord",
+				B:    "someOtherRecord",
+				Keep: false,
 			},
 		},
 		Actor:  testReviewActor,
