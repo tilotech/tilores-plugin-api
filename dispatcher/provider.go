@@ -31,6 +31,7 @@ const (
 	claimReviewCaseMethod     = "/claim-review-case"
 	releaseReviewCaseMethod   = "/release-review-case"
 	resolveReviewCaseMethod   = "/resolve-review-case"
+	reviewDecisionsMethod     = "/review-decisions"
 )
 
 func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.InvokeFunc, error) {
@@ -59,6 +60,8 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 		return &ReleaseReviewCaseInput{}, p.ReleaseReviewCase, nil
 	case resolveReviewCaseMethod:
 		return &ResolveReviewCaseInput{}, p.ResolveReviewCase, nil
+	case reviewDecisionsMethod:
+		return &ReviewDecisionsInput{}, p.ReviewDecisions, nil
 	}
 	return nil, nil, fmt.Errorf("invalid method %v", method)
 }
@@ -109,4 +112,8 @@ func (p *provider) ReleaseReviewCase(ctx context.Context, params plugin.RequestP
 
 func (p *provider) ResolveReviewCase(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.ResolveReviewCase(ctx, params.(*ResolveReviewCaseInput))
+}
+
+func (p *provider) ReviewDecisions(ctx context.Context, params plugin.RequestParameter) (any, error) {
+	return p.impl.ReviewDecisions(ctx, params.(*ReviewDecisionsInput))
 }

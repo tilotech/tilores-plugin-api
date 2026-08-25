@@ -152,6 +152,15 @@ func TestPlugin(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.True(t, resolveOutput.Triggered)
+
+	decisionsOutput, err := dsp.ReviewDecisions(context.Background(), &dispatcher.ReviewDecisionsInput{
+		RecordIDs: []string{"12345"},
+	})
+	require.NoError(t, err)
+	require.Len(t, decisionsOutput.Decisions, 1)
+	assert.Equal(t, &testReviewDecision, decisionsOutput.Decisions[0])
+	require.NotNil(t, decisionsOutput.NextCursor)
+	assert.Equal(t, "someCursor", *decisionsOutput.NextCursor)
 }
 
 type testDispatcher struct {
@@ -217,6 +226,21 @@ var testReviewCase = dispatcher.ReviewCase{
 }
 
 var testReviewClaimedAt = time.Date(2026, 8, 19, 11, 0, 0, 0, time.UTC)
+
+var testReviewDecision = dispatcher.ReviewDecision{
+	ID:   "someCase",
+	Case: &testReviewCase,
+	Verdicts: []dispatcher.ReviewLinkVerdict{
+		{
+			A:    "12345",
+			B:    "67890",
+			Keep: false,
+		},
+	},
+	Actor:     testReviewActor,
+	Reason:    "someReason",
+	DecidedAt: time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC),
+}
 
 func (d *testDispatcher) Entity(ctx context.Context, _ *dispatcher.EntityInput) (*dispatcher.EntityOutput, error) {
 	_, d.deadlineExists = ctx.Deadline()
@@ -299,5 +323,13 @@ func (d *testDispatcher) ReleaseReviewCase(_ context.Context, _ *dispatcher.Rele
 func (d *testDispatcher) ResolveReviewCase(_ context.Context, _ *dispatcher.ResolveReviewCaseInput) (*dispatcher.ResolveReviewCaseOutput, error) {
 	return &dispatcher.ResolveReviewCaseOutput{
 		Triggered: true,
+	}, nil
+}
+
+func (d *testDispatcher) ReviewDecisions(_ context.Context, _ *dispatcher.ReviewDecisionsInput) (*dispatcher.ReviewDecisionsOutput, error) {
+	cursor := "someCursor"
+	return &dispatcher.ReviewDecisionsOutput{
+		Decisions:  []*dispatcher.ReviewDecision{&testReviewDecision},
+		NextCursor: &cursor,
 	}, nil
 }

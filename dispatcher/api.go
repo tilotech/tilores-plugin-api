@@ -28,6 +28,7 @@ type Dispatcher interface {
 	ClaimReviewCase(ctx context.Context, input *ClaimReviewCaseInput) (*ClaimReviewCaseOutput, error)
 	ReleaseReviewCase(ctx context.Context, input *ReleaseReviewCaseInput) (*ReleaseReviewCaseOutput, error)
 	ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseInput) (*ResolveReviewCaseOutput, error)
+	ReviewDecisions(ctx context.Context, input *ReviewDecisionsInput) (*ReviewDecisionsOutput, error)
 }
 
 // EntityInput includes the data required to get an entity by its ID

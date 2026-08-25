@@ -142,3 +142,31 @@ type ResolveReviewCaseInput struct {
 type ResolveReviewCaseOutput struct {
 	Triggered bool `json:"triggered"`
 }
+
+// ReviewDecisionsInput selects the decisions to return.
+//
+// The decisions are looked up by the records that were under review, not by the
+// entity they belonged to: an entity ID may have merged away since the decision
+// was made, a record ID is permanent.
+type ReviewDecisionsInput struct {
+	RecordIDs []string `json:"recordIDs"` // with or without version
+	Cursor    *string  `json:"cursor"`    // opaque, empty starts at the newest
+	Limit     *int     `json:"limit"`
+}
+
+// ReviewDecisionsOutput is the result of a ReviewDecisions call, newest
+// decision first.
+type ReviewDecisionsOutput struct {
+	Decisions  []*ReviewDecision `json:"decisions"`
+	NextCursor *string           `json:"nextCursor"` // nil means end of the history
+}
+
+// ReviewDecision is the permanent record of a resolved review case.
+type ReviewDecision struct {
+	ID        string              `json:"id"` // the ID of the case that was decided
+	Case      *ReviewCase         `json:"case"`
+	Verdicts  []ReviewLinkVerdict `json:"verdicts"`
+	Actor     ReviewActor         `json:"actor"`
+	Reason    string              `json:"reason"`
+	DecidedAt time.Time           `json:"decidedAt"`
+}

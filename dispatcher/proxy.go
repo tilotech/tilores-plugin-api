@@ -127,3 +127,12 @@ func (p *proxy) ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseI
 	}
 	return response, nil
 }
+
+func (p *proxy) ReviewDecisions(ctx context.Context, input *ReviewDecisionsInput) (*ReviewDecisionsOutput, error) {
+	response := &ReviewDecisionsOutput{}
+	err := p.client.Call(ctx, reviewDecisionsMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
