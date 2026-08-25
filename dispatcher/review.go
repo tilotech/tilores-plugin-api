@@ -83,6 +83,21 @@ type ReviewActor struct {
 	Name string          `json:"name"` // for display only
 }
 
+// CreateReviewCaseInput identifies the entity to put under review.
+type CreateReviewCaseInput struct {
+	EntityID string `json:"entityID"`
+}
+
+// CreateReviewCaseOutput provides the queued case.
+//
+// Created reports whether the case was actually added. A case that was already
+// waiting for this entity is returned unchanged instead of queueing a second
+// one for the same thing.
+type CreateReviewCaseOutput struct {
+	Case    *ReviewCase `json:"case"`
+	Created bool        `json:"created"`
+}
+
 // ClaimReviewCaseInput identifies the case to claim and who claims it.
 type ClaimReviewCaseInput struct {
 	ID    string      `json:"id"`

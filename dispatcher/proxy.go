@@ -101,6 +101,15 @@ func (p *proxy) ReviewCases(ctx context.Context, input *ReviewCasesInput) (*Revi
 	return response, nil
 }
 
+func (p *proxy) CreateReviewCase(ctx context.Context, input *CreateReviewCaseInput) (*CreateReviewCaseOutput, error) {
+	response := &CreateReviewCaseOutput{}
+	err := p.client.Call(ctx, createReviewCaseMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 func (p *proxy) ClaimReviewCase(ctx context.Context, input *ClaimReviewCaseInput) (*ClaimReviewCaseOutput, error) {
 	response := &ClaimReviewCaseOutput{}
 	err := p.client.Call(ctx, claimReviewCaseMethod, input, response)

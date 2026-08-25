@@ -28,6 +28,7 @@ const (
 	searchMethod              = "/search"
 	assemblyStatusMethod      = "/assembly-status"
 	reviewCasesMethod         = "/review-cases"
+	createReviewCaseMethod    = "/create-review-case"
 	claimReviewCaseMethod     = "/claim-review-case"
 	releaseReviewCaseMethod   = "/release-review-case"
 	resolveReviewCaseMethod   = "/resolve-review-case"
@@ -54,6 +55,8 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 		return nil, p.AssemblyStatus, nil
 	case reviewCasesMethod:
 		return &ReviewCasesInput{}, p.ReviewCases, nil
+	case createReviewCaseMethod:
+		return &CreateReviewCaseInput{}, p.CreateReviewCase, nil
 	case claimReviewCaseMethod:
 		return &ClaimReviewCaseInput{}, p.ClaimReviewCase, nil
 	case releaseReviewCaseMethod:
@@ -100,6 +103,10 @@ func (p *provider) AssemblyStatus(ctx context.Context, _ plugin.RequestParameter
 
 func (p *provider) ReviewCases(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.ReviewCases(ctx, params.(*ReviewCasesInput))
+}
+
+func (p *provider) CreateReviewCase(ctx context.Context, params plugin.RequestParameter) (any, error) {
+	return p.impl.CreateReviewCase(ctx, params.(*CreateReviewCaseInput))
 }
 
 func (p *provider) ClaimReviewCase(ctx context.Context, params plugin.RequestParameter) (any, error) {

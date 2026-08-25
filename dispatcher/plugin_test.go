@@ -120,6 +120,13 @@ func TestPlugin(t *testing.T) {
 	assert.Equal(t, "someCursor", *reviewCasesOutput.NextCursor)
 	assert.Equal(t, 3, reviewCasesOutput.OpenCount)
 
+	createOutput, err := dsp.CreateReviewCase(context.Background(), &dispatcher.CreateReviewCaseInput{
+		EntityID: "someEntity",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, &testReviewCase, createOutput.Case)
+	assert.True(t, createOutput.Created)
+
 	claimOutput, err := dsp.ClaimReviewCase(context.Background(), &dispatcher.ClaimReviewCaseInput{
 		ID:    "someCase",
 		Actor: testReviewActor,
@@ -303,6 +310,13 @@ func (d *testDispatcher) ReviewCases(_ context.Context, _ *dispatcher.ReviewCase
 		Cases:      []*dispatcher.ReviewCase{&testReviewCase},
 		NextCursor: &cursor,
 		OpenCount:  3,
+	}, nil
+}
+
+func (d *testDispatcher) CreateReviewCase(_ context.Context, _ *dispatcher.CreateReviewCaseInput) (*dispatcher.CreateReviewCaseOutput, error) {
+	return &dispatcher.CreateReviewCaseOutput{
+		Case:    &testReviewCase,
+		Created: true,
 	}, nil
 }
 

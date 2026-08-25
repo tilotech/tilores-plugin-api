@@ -25,6 +25,7 @@ type Dispatcher interface {
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
 	AssemblyStatus(ctx context.Context) (*AssemblyStatusOutput, error)
 	ReviewCases(ctx context.Context, input *ReviewCasesInput) (*ReviewCasesOutput, error)
+	CreateReviewCase(ctx context.Context, input *CreateReviewCaseInput) (*CreateReviewCaseOutput, error)
 	ClaimReviewCase(ctx context.Context, input *ClaimReviewCaseInput) (*ClaimReviewCaseOutput, error)
 	ReleaseReviewCase(ctx context.Context, input *ReleaseReviewCaseInput) (*ReleaseReviewCaseOutput, error)
 	ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseInput) (*ResolveReviewCaseOutput, error)
