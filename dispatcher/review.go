@@ -159,12 +159,18 @@ type ReviewLinkVerdict struct {
 // the pair of records it connects, so such a pair needs nothing the case would
 // have to know about beforehand.
 //
-// Lock is the lock ClaimReviewCase handed out and is what proves that the
-// caller is still the holder of the claim. It is only ever compared against the
-// claim - the disassembly adopts the lock the case itself recorded - so a lock
-// that no longer matches means somebody else has claimed the case since, and
-// the resolution is refused instead of deciding on their behalf. The lock is
-// never part of a listed case, so only the current claimant can supply it.
+// Lock is the lock ClaimReviewCase handed out. It is a generation marker on the
+// claim rather than a capability: a claim that was released and taken again
+// mints a new value, so a caller resolving after losing its claim is refused
+// instead of deciding on the current holder's behalf, which the actor alone
+// cannot catch when the new holder is the same actor. It is only ever compared
+// against the claim - the disassembly adopts the lock the case itself recorded.
+//
+// It is not a secret: a listed case carries the claiming actor and the moment
+// of the claim, which is what the value is made of. Nor does it separate two
+// concurrent sessions of one actor. The lock model is cooperative throughout -
+// ReleaseReviewCase takes no lock at all, so that a claim whose holder is gone
+// can always be freed.
 type ResolveReviewCaseInput struct {
 	ID       string              `json:"id"`
 	Verdicts []ReviewLinkVerdict `json:"verdicts"`
