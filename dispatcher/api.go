@@ -10,8 +10,8 @@ import (
 // webserver API (typically GraphQL) and the internal TiloRes API.
 //
 // This interface is mostly created to support different deployment types, e.g.
-// a local deployment with a fake implementation and a serverless deployment
-// with the actual implementation.
+// an embedded deployment that calls the implementation in process and a
+// serverless deployment that reaches it through the plugin proxy.
 //
 // However, it might also offer the possibility to add data modifications on the
 // customers side at a central place.
