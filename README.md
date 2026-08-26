@@ -49,8 +49,6 @@ plugin consumers for each interface.
 
 Known Providers:
 * TiloRes Core Dispatcher - proprietary default implementation
-* [Fake Dispatcher](https://github.com/tilotech/tilores-plugin-fake-dispatcher) -
-  a dispatcher that fakes a TiloRes Core implementation for local API testing
 
 Known Consumers:
 * Customer projects generated using [TiloRes CLI](https://github.com/tilotech/tilores-cli)

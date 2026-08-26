@@ -156,9 +156,11 @@ func TestPlugin(t *testing.T) {
 		},
 		Actor:  testReviewActor,
 		Reason: "someReason",
+		Lock:   "review:someUser:1",
 	})
 	require.NoError(t, err)
 	assert.True(t, resolveOutput.Triggered)
+	assert.Equal(t, "review:someUser:1", pluginImpl.resolveLock)
 
 	decisionsOutput, err := dsp.ReviewDecisions(context.Background(), &dispatcher.ReviewDecisionsInput{
 		RecordIDs: []string{"12345"},
@@ -173,6 +175,7 @@ func TestPlugin(t *testing.T) {
 type testDispatcher struct {
 	deadlineExists  bool
 	disassembleLock string
+	resolveLock     string
 }
 
 var testEntity = api.Entity{
@@ -334,7 +337,8 @@ func (d *testDispatcher) ReleaseReviewCase(_ context.Context, _ *dispatcher.Rele
 	}, nil
 }
 
-func (d *testDispatcher) ResolveReviewCase(_ context.Context, _ *dispatcher.ResolveReviewCaseInput) (*dispatcher.ResolveReviewCaseOutput, error) {
+func (d *testDispatcher) ResolveReviewCase(_ context.Context, input *dispatcher.ResolveReviewCaseInput) (*dispatcher.ResolveReviewCaseOutput, error) {
+	d.resolveLock = input.Lock
 	return &dispatcher.ResolveReviewCaseOutput{
 		Triggered: true,
 	}, nil

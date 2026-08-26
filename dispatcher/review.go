@@ -84,6 +84,14 @@ type ReviewActor struct {
 }
 
 // CreateReviewCaseInput identifies the entity to put under review.
+//
+// This is the manual counterpart to detection and is never called from an
+// assembly: it exists for the case a person opens after spotting a wrong merge
+// that the criterion never flagged. The entity ID is therefore all there is to
+// give - at that point nobody knows yet which of the entity's links are the
+// mistake, which is exactly what the review is going to establish - so the
+// resulting case carries no links and a verdict may name any pair of its
+// records.
 type CreateReviewCaseInput struct {
 	EntityID string `json:"entityID"`
 }
@@ -142,11 +150,27 @@ type ReviewLinkVerdict struct {
 }
 
 // ResolveReviewCaseInput provides the verdicts for a claimed case.
+//
+// Verdicts must cover every link the case carries. A link without a verdict is
+// refused rather than defaulted to being kept, because silently confirming a
+// join that nobody looked at is the one outcome this feature exists to prevent.
+// Further verdicts are allowed and are how a review concludes that the flagged
+// link is fine and a neighbouring one is the actual mistake: a link is named by
+// the pair of records it connects, so such a pair needs nothing the case would
+// have to know about beforehand.
+//
+// Lock is the lock ClaimReviewCase handed out and is what proves that the
+// caller is still the holder of the claim. It is only ever compared against the
+// claim - the disassembly adopts the lock the case itself recorded - so a lock
+// that no longer matches means somebody else has claimed the case since, and
+// the resolution is refused instead of deciding on their behalf. The lock is
+// never part of a listed case, so only the current claimant can supply it.
 type ResolveReviewCaseInput struct {
 	ID       string              `json:"id"`
 	Verdicts []ReviewLinkVerdict `json:"verdicts"`
 	Actor    ReviewActor         `json:"actor"`
 	Reason   string              `json:"reason"`
+	Lock     string              `json:"lock"`
 }
 
 // ResolveReviewCaseOutput reports whether the resolution triggered a
