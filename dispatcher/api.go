@@ -10,8 +10,8 @@ import (
 // webserver API (typically GraphQL) and the internal TiloRes API.
 //
 // This interface is mostly created to support different deployment types, e.g.
-// a local deployment with a fake implementation and a serverless deployment
-// with the actual implementation.
+// an embedded deployment that calls the implementation in process and a
+// serverless deployment that reaches it through the plugin proxy.
 //
 // However, it might also offer the possibility to add data modifications on the
 // customers side at a central place.
@@ -24,6 +24,12 @@ type Dispatcher interface {
 	Disassemble(ctx context.Context, input *DisassembleInput) (*DisassembleOutput, error)
 	RemoveConnectionBan(ctx context.Context, input *RemoveConnectionBanInput) error
 	AssemblyStatus(ctx context.Context) (*AssemblyStatusOutput, error)
+	ReviewCases(ctx context.Context, input *ReviewCasesInput) (*ReviewCasesOutput, error)
+	CreateReviewCase(ctx context.Context, input *CreateReviewCaseInput) (*CreateReviewCaseOutput, error)
+	ClaimReviewCase(ctx context.Context, input *ClaimReviewCaseInput) (*ClaimReviewCaseOutput, error)
+	ReleaseReviewCase(ctx context.Context, input *ReleaseReviewCaseInput) (*ReleaseReviewCaseOutput, error)
+	ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseInput) (*ResolveReviewCaseOutput, error)
+	ReviewDecisions(ctx context.Context, input *ReviewDecisionsInput) (*ReviewDecisionsOutput, error)
 }
 
 // EntityInput includes the data required to get an entity by its ID
@@ -119,11 +125,17 @@ type SubmitWithPreviewOutput struct {
 //
 // The metadata is required when disassemble is triggered by a real person,
 // Otherwise it MAY be omitted.
+//
+// Lock, when set, is adopted as the lock for this disassembly instead of
+// creating a new one. This allows a caller that already holds a lock on the
+// affected entity, e.g. an ongoing review, to hand it over. The lock is released
+// when the disassembly has been applied.
 type DisassembleInput struct {
 	Edges               []DisassembleEdge `json:"edges"`
 	RecordIDs           []string          `json:"recordIDs"`
 	CreateConnectionBan bool              `json:"createConnectionBan"`
 	Meta                *DisassembleMeta  `json:"meta"`
+	Lock                string            `json:"lock"`
 }
 
 // DisassembleEdge represents a single edge to be removed
