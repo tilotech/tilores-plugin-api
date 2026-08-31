@@ -7,10 +7,14 @@ package api
 // The feature is considered active in case of nil, missing value and explicit true.
 type Features struct {
 	EntityConsistency *bool `json:"entityConsistency"`
-	EntityDuplicates  *bool `json:"entityDuplicates"`
-	EntityEdges       *bool `json:"entityEdges"`
-	EntityHits        *bool `json:"entityHits"`
-	EntityHitScore    *bool `json:"entityHitScore"`
-	EntityRecords     *bool `json:"entityRecords"`
-	EntityScore       *bool `json:"entityScore"`
+	// EntityConsistencyValues is worth switching off when unused: unlike the
+	// other features it is recomputed per record on every request, because the
+	// values the consistency rules compare are not stored anywhere.
+	EntityConsistencyValues *bool `json:"entityConsistencyValues"`
+	EntityDuplicates        *bool `json:"entityDuplicates"`
+	EntityEdges             *bool `json:"entityEdges"`
+	EntityHits              *bool `json:"entityHits"`
+	EntityHitScore          *bool `json:"entityHitScore"`
+	EntityRecords           *bool `json:"entityRecords"`
+	EntityScore             *bool `json:"entityScore"`
 }

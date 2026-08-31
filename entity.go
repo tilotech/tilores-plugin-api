@@ -8,14 +8,49 @@ import (
 
 // Entity represents a real world object
 type Entity struct {
-	ID          string     `json:"id"`
-	Records     []*Record  `json:"records"`
-	Edges       Edges      `json:"edges"`
-	Duplicates  Duplicates `json:"duplicates"`
-	Hits        Hits       `json:"hits"`
-	Consistency float64    `json:"consistency"`
-	Score       float64    `json:"score"`
-	HitScore    float64    `json:"hitScore"`
+	ID                string             `json:"id"`
+	Records           []*Record          `json:"records"`
+	Edges             Edges              `json:"edges"`
+	Duplicates        Duplicates         `json:"duplicates"`
+	Hits              Hits               `json:"hits"`
+	Consistency       float64            `json:"consistency"`
+	ConsistencyValues []ConsistencyValue `json:"consistencyValues"`
+	Score             float64            `json:"score"`
+	HitScore          float64            `json:"hitScore"`
+}
+
+// ConsistencyValue is one value that the consistency rules compared, together
+// with the number of records of the entity that hold it.
+//
+// Consistency rules are the one configurable reason for records to be kept
+// apart: they must match for two records to be allowed to share an entity, so
+// a record whose identifier contradicts an entity's is not merged into it even
+// though other rules linked them. Which values those rules looked at is
+// otherwise not observable — the engine reports neither the rejection nor the
+// values behind it — which leaves a client to guess at them from the rule
+// configuration, if it has one at all.
+//
+// A rule that compares a set of identifiers reports one entry per identifier,
+// keyed by its name. A rule that compares a single value reports one entry
+// keyed "consistency", because a resolver has no name to offer.
+//
+// Value is nil for the records that carry no consistency value at all. Those
+// records are reported rather than left out: an identifier that is simply
+// absent is what the usual "or empty" rule makes harmless, and the difference
+// between "no record has one" and "they disagree" is the whole answer. The
+// counts therefore add up to the number of records of the entity, per key.
+//
+// Example (in JSON):
+//
+//	[
+//	  {"key": "country", "value": "de", "count": 3},
+//	  {"key": "vat_id", "value": "123456789", "count": 2},
+//	  {"key": "vat_id", "value": null, "count": 1}
+//	]
+type ConsistencyValue struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value"`
+	Count int     `json:"count"`
 }
 
 // Edges represents a connection between two Records
