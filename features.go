@@ -6,10 +6,7 @@ package api
 // A feature is only considered inactive in case it was explicitly set to false.
 // The feature is considered active in case of nil, missing value and explicit true.
 type Features struct {
-	EntityConsistency *bool `json:"entityConsistency"`
-	// EntityConsistencyValues is worth switching off when unused: unlike the
-	// other features it is recomputed per record on every request, because the
-	// values the consistency rules compare are not stored anywhere.
+	EntityConsistency       *bool `json:"entityConsistency"`
 	EntityConsistencyValues *bool `json:"entityConsistencyValues"`
 	EntityDuplicates        *bool `json:"entityDuplicates"`
 	EntityEdges             *bool `json:"entityEdges"`

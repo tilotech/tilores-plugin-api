@@ -30,15 +30,16 @@ type Entity struct {
 // values behind it — which leaves a client to guess at them from the rule
 // configuration, if it has one at all.
 //
-// A rule that compares a set of identifiers reports one entry per identifier,
-// keyed by its name. A rule that compares a single value reports one entry
-// keyed "consistency", because a resolver has no name to offer.
-//
 // Value is nil for the records that carry no consistency value at all. Those
 // records are reported rather than left out: an identifier that is simply
 // absent is what the usual "or empty" rule makes harmless, and the difference
-// between "no record has one" and "they disagree" is the whole answer. The
-// counts therefore add up to the number of records of the entity, per key.
+// between "no record has one" and "they disagree" is the whole answer.
+//
+// An identifier that only some of the records carry is not reported as absent
+// for the rest: they never had it, and a rule ignores a key that only one side
+// knows. So the counts add up to the number of records of the entity only where
+// every record is known to have the key — for a rule comparing a single value,
+// not for one comparing a set of identifiers.
 //
 // Example (in JSON):
 //
