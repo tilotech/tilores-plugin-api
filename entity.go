@@ -8,14 +8,44 @@ import (
 
 // Entity represents a real world object
 type Entity struct {
-	ID          string     `json:"id"`
-	Records     []*Record  `json:"records"`
-	Edges       Edges      `json:"edges"`
-	Duplicates  Duplicates `json:"duplicates"`
-	Hits        Hits       `json:"hits"`
-	Consistency float64    `json:"consistency"`
-	Score       float64    `json:"score"`
-	HitScore    float64    `json:"hitScore"`
+	ID                string             `json:"id"`
+	Records           []*Record          `json:"records"`
+	Edges             Edges              `json:"edges"`
+	Duplicates        Duplicates         `json:"duplicates"`
+	Hits              Hits               `json:"hits"`
+	Consistency       float64            `json:"consistency"`
+	ConsistencyValues []ConsistencyValue `json:"consistencyValues"`
+	Score             float64            `json:"score"`
+	HitScore          float64            `json:"hitScore"`
+}
+
+// ConsistencyValue is one value that the consistency rules compared, together
+// with the number of records of the entity that hold it.
+//
+// Consistency rules are the one configurable reason for records to be kept
+// apart: they must match for two records to be allowed to share an entity, so
+// a record whose identifier contradicts an entity's is not merged into it even
+// though other rules linked them. Which values those rules looked at is
+// otherwise not observable — the engine reports neither the rejection nor the
+// values behind it — which leaves a client to guess at them from the rule
+// configuration, if it has one at all.
+//
+// Only values that a record actually carries are reported. A record carrying
+// none is left out rather than reported as empty: an absent value is compatible
+// with everything, so it can never be the reason two entities were kept apart.
+// The counts therefore say how many records hold a value, not how many records
+// the entity has.
+//
+// Example (in JSON):
+//
+//	[
+//	  {"key": "country", "value": "de", "count": 3},
+//	  {"key": "vat_id", "value": "123456789", "count": 2}
+//	]
+type ConsistencyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+	Count int    `json:"count"`
 }
 
 // Edges represents a connection between two Records
