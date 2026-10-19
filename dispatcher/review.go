@@ -36,10 +36,10 @@ type ReviewCasesOutput struct {
 // ReviewCase describes an assembly that found one or more entities on evidence
 // that was too weak to be trusted.
 //
-// Depending on the configuration, the assembly either joined those entities and
-// the review decides whether the join stands, or it held them apart and the
-// review decides whether they are joined. HeldApart tells which: it is true as
-// soon as a single candidate was held apart.
+// Depending on the join strategy of the configuration, the assembly either
+// joined those entities and the review decides whether the join stands, or it
+// deferred the join and the review decides whether it happens. Which one
+// applies is a property of every single candidate, see ReviewCandidate.
 type ReviewCase struct {
 	ID         string            `json:"id"`
 	Status     ReviewCaseStatus  `json:"status"`
@@ -47,7 +47,6 @@ type ReviewCase struct {
 	RecordIDs  []string          `json:"recordIDs"` // the submitted records, with version
 	EntityID   string            `json:"entityID"`  // the entity of the submitted records at detection time
 	Candidates []ReviewCandidate `json:"candidates"`
-	HeldApart  bool              `json:"heldApart"`
 	ClaimedBy  *ReviewActor      `json:"claimedBy"`
 	ClaimedAt  *time.Time        `json:"claimedAt"`
 }
@@ -55,14 +54,14 @@ type ReviewCase struct {
 // ReviewCandidate is a single entity that the submitted records matched too
 // weakly.
 //
-// Held reports that the candidate was kept apart from the submitted records
-// instead of being joined. A case that holds candidates apart may still list
-// joined ones, e.g. the entity the submitted records already belonged to, which
-// is never held apart from them.
+// Deferred reports that the join with the candidate was deferred: the
+// candidate was kept apart from the submitted records instead of being joined.
+// A case with deferred candidates may still list joined ones, e.g. the entity
+// the submitted records already belonged to, whose join is never deferred.
 type ReviewCandidate struct {
 	EntityID string       `json:"entityID"`
 	Links    []ReviewLink `json:"links"`
-	Held     bool         `json:"held"`
+	Deferred bool         `json:"deferred"`
 }
 
 // ReviewLink is a single pair of records that matched.
@@ -133,10 +132,10 @@ type ClaimReviewCaseInput struct {
 // records of the case and may therefore differ from the entity ID stored on the
 // case.
 //
-// CandidateEntityIDs are the entities of the candidates that were held apart,
-// also re-derived from their records. They are locked with the same lock, so
-// that nothing the review is about can change while it is decided. The list is
-// empty for a case that holds nothing apart.
+// CandidateEntityIDs are the entities of the deferred candidates, also
+// re-derived from their records. They are locked with the same lock, so that
+// nothing the review is about can change while it is decided. The list is
+// empty for a case without deferred candidates.
 type ClaimReviewCaseOutput struct {
 	Case               *ReviewCase `json:"case"`
 	EntityID           string      `json:"entityID"`
@@ -169,8 +168,8 @@ type ReleaseReviewCaseOutput struct {
 //
 // Keep tells whether the two records legitimately belong to the same entity.
 // For a link that was joined, keeping it leaves it in place and rejecting it
-// removes it. For a link that was held apart, keeping it joins the two records
-// and rejecting it leaves them apart.
+// removes it. For a link of a deferred candidate, keeping it joins the two
+// records and rejecting it leaves them apart.
 type ReviewLinkVerdict struct {
 	A    string `json:"a"`
 	B    string `json:"b"`
@@ -185,7 +184,7 @@ type ReviewLinkVerdict struct {
 // Further verdicts are allowed and are how a review concludes that the flagged
 // link is fine and a neighbouring one is the actual mistake: a link is named by
 // the pair of records it connects, so such a pair needs nothing the case would
-// have to know about beforehand. For a case that holds candidates apart, such a
+// have to know about beforehand. For a case with deferred candidates, such a
 // pair must connect one submitted record with one record that was not
 // submitted, because the records are applied by assembling the submitted ones
 // again, which can only decide about the links of those.
@@ -214,8 +213,8 @@ type ResolveReviewCaseInput struct {
 // ResolveReviewCaseOutput reports whether the resolution triggered a change.
 //
 // For a case that joined its candidates, the change is the disassembly of the
-// rejected links. For a case that holds candidates apart, it is the assembly
-// that joins the kept links. Either is asynchronous: a triggered change has been
+// rejected links. For a case with deferred candidates, it is the assembly that
+// joins the kept links. Either is asynchronous: a triggered change has been
 // enqueued but not necessarily applied yet. The locks of the case are released
 // once it has been applied, or right away if nothing was triggered.
 type ResolveReviewCaseOutput struct {
@@ -223,7 +222,7 @@ type ResolveReviewCaseOutput struct {
 }
 
 // ReviewAssembleInput is the payload of a REVIEW_ASSEMBLE event, which applies
-// the verdicts of a review case that held candidates apart.
+// the verdicts of a review case with deferred candidates.
 //
 // The records of the case are assembled again, with every kept link counting
 // as approved and every rejected link being ignored, so that the current rules
