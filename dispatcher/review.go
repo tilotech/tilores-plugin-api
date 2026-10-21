@@ -185,9 +185,10 @@ type ReviewLinkVerdict struct {
 // link is fine and a neighbouring one is the actual mistake: a link is named by
 // the pair of records it connects, so such a pair needs nothing the case would
 // have to know about beforehand. For a case with deferred candidates, such a
-// pair must connect one submitted record with one record that was not
-// submitted, because the records are applied by assembling the submitted ones
-// again, which can only decide about the links of those.
+// pair must not connect two submitted records, and a pair of records that were
+// not submitted must belong to the entities the case is about: the claim
+// locked those, and the assembly that applies the verdicts removes a rejected
+// link between them.
 //
 // Lock is the lock ClaimReviewCase handed out. It is a generation marker on the
 // claim rather than a capability: a claim that was released and taken again
@@ -226,7 +227,9 @@ type ResolveReviewCaseOutput struct {
 //
 // The records of the case are assembled again, with every kept link counting
 // as approved and every rejected link being ignored, so that the current rules
-// and consistency decide about the result. It is written by ResolveReviewCase
+// and consistency decide about the result. A rejected link between two records
+// that were not submitted is removed from their entity in the same assembly,
+// which splits what is no longer connected. It is written by ResolveReviewCase
 // and not meant to be sent by anybody else.
 //
 // Records carry the version they are stored with. Their data is unchanged, a
