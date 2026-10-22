@@ -17,6 +17,9 @@ import (
 //
 // In case of type "DISASSEMBLE", the payload is a *dispatcher.DisassembleInput.
 //
+// In case of type "REVIEW_ASSEMBLE", the payload is a
+// *dispatcher.ReviewAssembleInput.
+//
 // For backwards compatibility, the old event input for assemble requests is
 // also supported. The output after unmarshaling will be the same as for type
 // "ASSEMBLE".
@@ -32,6 +35,10 @@ const (
 
 	// EventTypeDisassemble is used when the payload is for the disassemble process.
 	EventTypeDisassemble = "DISASSEMBLE"
+
+	// EventTypeReviewAssemble is used when the payload assembles the records of
+	// a resolved review case again, see ReviewAssembleInput.
+	EventTypeReviewAssemble = "REVIEW_ASSEMBLE"
 )
 
 // AssembleEventFlag defines additional flags that can be send in combination
@@ -78,6 +85,9 @@ func (r *AssembleEvent) UnmarshalJSON(b []byte) error {
 		payload = pl
 	case EventTypeDisassemble:
 		payload = &DisassembleInput{}
+		err = json.Unmarshal(partial.Payload, payload)
+	case EventTypeReviewAssemble:
+		payload = &ReviewAssembleInput{}
 		err = json.Unmarshal(partial.Payload, payload)
 	default:
 		return fmt.Errorf("invalid type %s", partial.Type)

@@ -115,6 +115,65 @@ func TestUnmarshalEvent(t *testing.T) {
 				Flags: []dispatcher.AssembleEventFlag{dispatcher.StateRectification},
 			},
 		},
+		"review assemble": {
+			input: `
+				{
+					"type": "REVIEW_ASSEMBLE",
+					"payload": {
+						"caseID": "case-1",
+						"records": [
+							{
+								"id": "foo",
+								"data": {
+									"key": "value"
+								},
+								"meta": {
+									"version": 2
+								}
+							}
+						],
+						"verdicts": [
+							{
+								"a": "foo:2",
+								"b": "bar:0",
+								"keep": true
+							}
+						],
+						"lock": "review:actor-1:1700000000",
+						"lockedEntityIDs": ["entity-1", "entity-2"]
+					}
+				}`,
+			expected: &dispatcher.AssembleEvent{
+				Type: "REVIEW_ASSEMBLE",
+				Payload: &dispatcher.ReviewAssembleInput{
+					CaseID: "case-1",
+					Records: []*api.Record{
+						{
+							ID: "foo",
+							Data: map[string]any{
+								"key": "value",
+							},
+							Meta: &api.RecordMeta{
+								Version: 2,
+							},
+						},
+					},
+					Verdicts: []dispatcher.ReviewLinkVerdict{
+						{
+							A:    "foo:2",
+							B:    "bar:0",
+							Keep: true,
+						},
+					},
+					Lock:            "review:actor-1:1700000000",
+					LockedEntityIDs: []string{"entity-1", "entity-2"},
+				},
+			},
+		},
+		"invalid review assemble payload": {
+			input:       `{"type": "REVIEW_ASSEMBLE", "payload": []}`,
+			expectError: true,
+		},
 		"invalid json": {
 			input:       `{invalid json`,
 			expectError: true,
