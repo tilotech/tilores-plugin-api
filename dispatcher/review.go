@@ -58,10 +58,17 @@ type ReviewCase struct {
 // candidate was kept apart from the submitted records instead of being joined.
 // A case with deferred candidates may still list joined ones, e.g. the entity
 // the submitted records already belonged to, whose join is never deferred.
+//
+// RecordIDs are only set for the other entity of a case that was created by
+// hand for two entities, see CreateReviewCaseInput. They are the records of
+// that entity, with version, and are how its current entity is found again.
+// Such a candidate has no links: no rule connects the two entities, and keeping
+// a link between one of its records and a record of the case joins them.
 type ReviewCandidate struct {
-	EntityID string       `json:"entityID"`
-	Links    []ReviewLink `json:"links"`
-	Deferred bool         `json:"deferred"`
+	EntityID  string       `json:"entityID"`
+	Links     []ReviewLink `json:"links"`
+	Deferred  bool         `json:"deferred"`
+	RecordIDs []string     `json:"recordIDs"`
 }
 
 // ReviewLink is a single pair of records that matched.
@@ -105,14 +112,21 @@ type ReviewActor struct {
 // mistake, which is exactly what the review is going to establish - so the
 // resulting case carries no links and a verdict may name any pair of its
 // records.
+//
+// OtherEntityID is optional and names a second entity that no rule connects
+// with the first one, for the case a person opens after spotting that the two
+// are the same. The case then lists the second entity as a candidate with its
+// records, and keeping a link between a record of each joins the two entities.
+// The order of the two entities does not matter.
 type CreateReviewCaseInput struct {
-	EntityID string `json:"entityID"`
+	EntityID      string `json:"entityID"`
+	OtherEntityID string `json:"otherEntityID"`
 }
 
 // CreateReviewCaseOutput provides the queued case.
 //
 // Created reports whether the case was actually added. A case that was already
-// waiting for this entity is returned unchanged instead of queueing a second
+// waiting for these entities is returned unchanged instead of queueing a second
 // one for the same thing.
 type CreateReviewCaseOutput struct {
 	Case    *ReviewCase `json:"case"`
@@ -132,10 +146,11 @@ type ClaimReviewCaseInput struct {
 // records of the case and may therefore differ from the entity ID stored on the
 // case.
 //
-// CandidateEntityIDs are the entities of the deferred candidates, also
-// re-derived from their records. They are locked with the same lock, so that
-// nothing the review is about can change while it is decided. The list is
-// empty for a case without deferred candidates.
+// CandidateEntityIDs are the entities of the deferred candidates, and of the
+// other entity of a case that was created for two entities, also re-derived
+// from their records. They are locked with the same lock, so that nothing the
+// review is about can change while it is decided. The list is empty for a case
+// about a single entity.
 type ClaimReviewCaseOutput struct {
 	Case               *ReviewCase `json:"case"`
 	EntityID           string      `json:"entityID"`
@@ -169,7 +184,8 @@ type ReleaseReviewCaseOutput struct {
 // Keep tells whether the two records legitimately belong to the same entity.
 // For a link that was joined, keeping it leaves it in place and rejecting it
 // removes it. For a link of a deferred candidate, keeping it joins the two
-// records and rejecting it leaves them apart.
+// records and rejecting it leaves them apart. The same holds for a pair of
+// records that connects the two entities of a case created for two entities.
 type ReviewLinkVerdict struct {
 	A    string `json:"a"`
 	B    string `json:"b"`
@@ -189,6 +205,13 @@ type ReviewLinkVerdict struct {
 // not submitted must belong to the entities the case is about: the claim
 // locked those, and the assembly that applies the verdicts removes a rejected
 // link between them.
+//
+// For a case created for two entities, every pair must connect records of
+// those two entities. Keeping a pair that connects both entities joins them,
+// unless the consistency rules keep them apart. Rejecting a pair within one
+// entity removes that link, which splits what is no longer connected, in the
+// same step as the join. Rejecting a pair that connects both entities, and
+// keeping a pair within one entity, change nothing.
 //
 // Lock is the lock ClaimReviewCase handed out. It is a generation marker on the
 // claim rather than a capability: a claim that was released and taken again
@@ -215,7 +238,8 @@ type ResolveReviewCaseInput struct {
 //
 // For a case that joined its candidates, the change is the disassembly of the
 // rejected links. For a case with deferred candidates, it is the assembly that
-// joins the kept links. Either is asynchronous: a triggered change has been
+// joins the kept links, and for a case created for two entities, the one that
+// joins them. Either is asynchronous: a triggered change has been
 // enqueued but not necessarily applied yet. The locks of the case are released
 // once it has been applied, or right away if nothing was triggered.
 type ResolveReviewCaseOutput struct {
@@ -241,6 +265,13 @@ type ResolveReviewCaseOutput struct {
 // Lock is the review lock of the claim. The assembly takes it over from every
 // entity that still carries it, including those of LockedEntityIDs that it does
 // not otherwise touch, and releases all of them once it has been applied.
+//
+// For a case created for two entities, Records is empty: no record is
+// assembled again and no record version changes. The kept pairs that connect
+// the two entities join them, and the rejected pairs within one entity are
+// removed. Only the entities that still carry the review lock take part, so
+// that an event that is delivered again after the locks were released changes
+// nothing.
 type ReviewAssembleInput struct {
 	CaseID          string              `json:"caseID"`
 	Records         []*api.Record       `json:"records"`
