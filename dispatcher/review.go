@@ -111,7 +111,9 @@ type ReviewActor struct {
 // give - at that point nobody knows yet which of the entity's links are the
 // mistake, which is exactly what the review is going to establish - so the
 // resulting case carries no links and a verdict may name any pair of its
-// records.
+// records. The case is about the records the entity holds when it is created:
+// if the entity splits before the case is claimed, the claim locks all its
+// parts, and keeping a link between two of them joins them again.
 //
 // OtherEntityID is optional and names a second entity that no rule connects
 // with the first one, for the case a person opens after spotting that the two
@@ -147,15 +149,17 @@ type ClaimReviewCaseInput struct {
 // case.
 //
 // CandidateEntityIDs are the entities of the deferred candidates, also
-// re-derived from their records. For a case that was created for two entities,
-// they are every further entity that the records of the case are in now, which
-// can be more than one if an entity split since the case was created. They are
-// locked with the same lock, so that nothing the review is about can change
-// while it is decided. The list is empty for a case about a single entity.
+// re-derived from their records. For a case that was created by hand, for one
+// entity or for two, they are every further entity that the records of the
+// case are in now, which can be more than the case was created for if an
+// entity split since. They are locked with the same lock, so that nothing the
+// review is about can change while it is decided. The list is empty for a
+// detected case about a single entity.
 //
-// A case created for two entities is stale once the records of either entity
-// are all gone, or once all its records share one entity; it is then removed
-// from the queue.
+// A case created by hand is stale once all its records are gone. A case
+// created for two entities is also stale once the records of either entity are
+// all gone, or once all its records share one entity. It is then removed from
+// the queue.
 type ClaimReviewCaseOutput struct {
 	Case               *ReviewCase `json:"case"`
 	EntityID           string      `json:"entityID"`
@@ -190,8 +194,7 @@ type ReleaseReviewCaseOutput struct {
 // For a link that was joined, keeping it leaves it in place and rejecting it
 // removes it. For a link of a deferred candidate, keeping it joins the two
 // records and rejecting it leaves them apart. The same holds for a pair of
-// records that connects two of the entities of a case created for two
-// entities.
+// records that connects two of the entities of a case created by hand.
 type ReviewLinkVerdict struct {
 	A    string `json:"a"`
 	B    string `json:"b"`
@@ -206,19 +209,21 @@ type ReviewLinkVerdict struct {
 // Further verdicts are allowed and are how a review concludes that the flagged
 // link is fine and a neighbouring one is the actual mistake: a link is named by
 // the pair of records it connects, so such a pair needs nothing the case would
-// have to know about beforehand. For a case with deferred candidates, such a
-// pair must not connect two submitted records, and a pair of records that were
-// not submitted must belong to the entities the case is about: the claim
-// locked those, and the assembly that applies the verdicts removes a rejected
-// link between them.
+// have to know about beforehand. For a detected case, such a pair must connect
+// two records of the entity the claim locked. For a case with deferred
+// candidates, such a pair must not connect two submitted records, and a pair of
+// records that were not submitted must belong to the entities the case is
+// about: the claim locked those, and the assembly that applies the verdicts
+// removes a rejected link between them.
 //
-// For a case created for two entities, every pair must connect records of the
-// entities the claim locked. Keeping a pair that connects two of them joins
-// them, unless the consistency rules keep them apart; pairs that join separate
-// groups of entities are checked group by group. Rejecting a pair within one
-// entity removes that link, which splits what is no longer connected, in the
-// same step as the join. Rejecting a pair that connects two entities, and
-// keeping a pair within one entity, change nothing.
+// For a case created by hand, for one entity or for two, every pair must
+// connect records of the entities the claim locked. Keeping a pair that
+// connects two of them joins them, unless the consistency rules keep them
+// apart; pairs that join separate groups of entities are checked group by
+// group. Rejecting a pair within one entity removes that link, which splits
+// what is no longer connected, in the same step as the join. Rejecting a pair
+// that connects two entities, and keeping a pair within one entity, change
+// nothing.
 //
 // Lock is the lock ClaimReviewCase handed out. It is a generation marker on the
 // claim rather than a capability: a claim that was released and taken again
@@ -273,8 +278,8 @@ type ResolveReviewCaseOutput struct {
 // entity that still carries it, including those of LockedEntityIDs that it does
 // not otherwise touch, and releases all of them once it has been applied.
 //
-// For a case created for two entities, Records is empty: no record is
-// assembled again and no record version changes. The kept pairs that connect
+// For a case created by hand, Records is empty: no record is assembled again
+// and no record version changes. The kept pairs that connect
 // two of its entities join them, and the rejected pairs within one entity are
 // removed. Only the entities that still carry the review lock take part, so
 // that an event that is delivered again after the locks were released changes
