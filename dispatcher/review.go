@@ -144,22 +144,23 @@ type ClaimReviewCaseInput struct {
 // ClaimReviewCaseOutput provides the claimed case together with the entities
 // that were locked for the review.
 //
-// EntityID is the entity of the submitted records. It is re-derived from the
-// records of the case and may therefore differ from the entity ID stored on the
-// case.
+// The records of a case are its submitted records, both records of each of its
+// links, and the records of the other entity of a case created for two
+// entities. The claim locks every entity they are in now, whatever kind the
+// case is, so that a review can change anything between them and nothing it is
+// about can change while it is decided. An entity that split since the case was
+// created is locked in all its parts.
 //
-// CandidateEntityIDs are the entities of the deferred candidates, also
-// re-derived from their records. For a case that was created by hand, for one
-// entity or for two, they are every further entity that the records of the
-// case are in now, which can be more than the case was created for if an
-// entity split since. They are locked with the same lock, so that nothing the
-// review is about can change while it is decided. The list is empty for a
-// detected case about a single entity.
+// EntityID is the entity of the first submitted record that still exists. It
+// is re-derived from the records and may therefore differ from the entity ID
+// stored on the case. CandidateEntityIDs are all further entities, locked with
+// the same lock.
 //
-// A case created by hand is stale once all its records are gone. A case
-// created for two entities is also stale once the records of either entity are
-// all gone, or once all its records share one entity. It is then removed from
-// the queue.
+// A case is stale once its submitted records are all gone. A case with deferred
+// candidates is also stale once a submitted record has a newer version, and a
+// case created for two entities once the records of the other entity are all
+// gone or all its records share one entity. A stale case is removed from the
+// queue.
 type ClaimReviewCaseOutput struct {
 	Case               *ReviewCase `json:"case"`
 	EntityID           string      `json:"entityID"`
@@ -191,10 +192,10 @@ type ReleaseReviewCaseOutput struct {
 // natural key, and the order of the two does not matter.
 //
 // Keep tells whether the two records legitimately belong to the same entity.
-// For a link that was joined, keeping it leaves it in place and rejecting it
-// removes it. For a link of a deferred candidate, keeping it joins the two
-// records and rejecting it leaves them apart. The same holds for a pair of
-// records that connects two of the entities of a case created by hand.
+// The same rules hold for every kind of case: rejecting a pair that an edge
+// connects removes every edge between the two, and keeping a pair that no edge
+// connects adds one, which joins their entities if they are two. Rejecting an
+// unconnected pair and keeping a connected one change nothing.
 type ReviewLinkVerdict struct {
 	A    string `json:"a"`
 	B    string `json:"b"`
@@ -206,32 +207,25 @@ type ReviewLinkVerdict struct {
 // Verdicts must cover every link the case carries. A link without a verdict is
 // refused rather than defaulted to being kept, because silently confirming a
 // join that nobody looked at is the one outcome this feature exists to prevent.
-// Further verdicts are allowed and are how a review concludes that the flagged
-// link is fine and a neighbouring one is the actual mistake: a link is named by
-// the pair of records it connects, so such a pair needs nothing the case would
-// have to know about beforehand. For a detected case, such a pair must connect
-// two records of the entity the claim locked. For a case with deferred
-// candidates, such a pair must not connect two submitted records, and a pair of
-// records that were not submitted must belong to the entities the case is
-// about: the claim locked those, and the assembly that applies the verdicts
-// removes a rejected link between them.
+// Further verdicts are allowed and are how a review removes or creates an edge
+// that the case does not name: a link is named by the pair of records it
+// connects, so such a pair needs nothing the case would have to know about
+// beforehand. A further pair must connect two different records that exist and
+// belong to the entities the claim locked. A link of the case itself may name a
+// record that was deleted since; its verdict then changes nothing.
 //
-// For a case created by hand, for one entity or for two, every pair must
-// connect records of the entities the claim locked. Keeping a pair that
-// connects two of them joins them, unless the consistency rules keep them
-// apart; pairs that join separate groups of entities are checked group by
-// group. Rejecting a pair within one entity removes that link, which splits
-// what is no longer connected, in the same step as the join. Rejecting a pair
-// that connects two entities, and keeping a pair within one entity, change
-// nothing.
+// The verdicts are applied the same way for every kind of case, see
+// ReviewLinkVerdict and ReviewAssembleInput. A kept edge that joins two
+// entities is not applied if the consistency rules keep them apart; edges that
+// join separate groups of entities are checked group by group.
 //
 // Lock is the lock ClaimReviewCase handed out. It is a generation marker on the
 // claim rather than a capability: a claim that was released and taken again
 // mints a new value, so a caller resolving after losing its claim is refused
 // instead of deciding on the current holder's behalf, which the actor alone
 // cannot catch when the new holder is the same actor. It is only ever compared
-// against the claim - the disassembly or assembly that applies the verdicts
-// takes over the lock the case itself recorded.
+// against the claim - the assembly that applies the verdicts takes over the
+// lock the case itself recorded.
 //
 // It is not a secret: a listed case carries the claiming actor and the moment
 // of the claim, which is what the value is made of. Nor does it separate two
@@ -248,46 +242,45 @@ type ResolveReviewCaseInput struct {
 
 // ResolveReviewCaseOutput reports whether the resolution triggered a change.
 //
-// For a case that joined its candidates, the change is the disassembly of the
-// rejected links. For a case with deferred candidates, it is the assembly that
-// joins the kept links, and for a case created for two entities, the one that
-// joins them. Either is asynchronous: a triggered change has been
-// enqueued but not necessarily applied yet. The locks of the case are released
-// once it has been applied, or right away if nothing was triggered.
+// The change is the assembly that applies the verdicts, see
+// ReviewAssembleInput. It is asynchronous: a triggered change has been enqueued
+// but not necessarily applied yet. The locks of the case are released once it
+// has been applied, or right away if no verdict changes anything.
 type ResolveReviewCaseOutput struct {
 	Triggered bool `json:"triggered"`
 }
 
 // ReviewAssembleInput is the payload of a REVIEW_ASSEMBLE event, which applies
-// the verdicts of a review case with deferred candidates.
+// the verdicts of a review case. It is written by ResolveReviewCase and not
+// meant to be sent by anybody else.
 //
-// The records of the case are assembled again, with every kept link counting
-// as approved and every rejected link being ignored, so that the current rules
-// and consistency decide about the result. A rejected link between two records
-// that were not submitted is removed from their entity in the same assembly,
-// which splits what is no longer connected. It is written by ResolveReviewCase
-// and not meant to be sent by anybody else.
+// The verdicts are applied to the graphs of the entities the claim locked, in
+// one assembly. A rejected pair that an edge connects loses every edge between
+// the two records, which splits what is no longer connected. A kept pair that
+// no edge connects gets an edge: with the rules of the link if Links names the
+// pair, and as a manual link otherwise. A kept pair across two entities joins
+// them, unless the consistency rules keep them apart. No record is assembled
+// again and no record version changes.
 //
-// Records carry the version they are stored with. Their data is unchanged, a
-// new version is created nevertheless. The assembly is dropped if a newer
-// version exists or a record no longer exists by then.
-//
-// The record IDs of the verdicts always carry a version.
+// The record IDs of the verdicts always carry a version. Links are the links of
+// the case, with the rules that matched them.
 //
 // Lock is the review lock of the claim. The assembly takes it over from every
 // entity that still carries it, including those of LockedEntityIDs that it does
-// not otherwise touch, and releases all of them once it has been applied.
+// not otherwise touch, and releases all of them once it has been applied. Only
+// the entities that still carry the review lock take part, so that an event
+// that is delivered again after the locks were released changes nothing.
 //
-// For a case created by hand, Records is empty: no record is assembled again
-// and no record version changes. The kept pairs that connect
-// two of its entities join them, and the rejected pairs within one entity are
-// removed. Only the entities that still carry the review lock take part, so
-// that an event that is delivered again after the locks were released changes
-// nothing.
+// Records is empty in every event written now. An event that an earlier
+// version wrote for a case with deferred candidates carries its submitted
+// records instead: they are assembled again with every kept link counting as
+// approved, and a new version is created. Such an event is dropped if a newer
+// version exists or a record no longer exists by then.
 type ReviewAssembleInput struct {
 	CaseID          string              `json:"caseID"`
 	Records         []*api.Record       `json:"records"`
 	Verdicts        []ReviewLinkVerdict `json:"verdicts"`
+	Links           []ReviewLink        `json:"links"`
 	Lock            string              `json:"lock"`
 	LockedEntityIDs []string            `json:"lockedEntityIDs"`
 }
