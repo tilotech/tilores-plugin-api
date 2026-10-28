@@ -158,9 +158,11 @@ type ClaimReviewCaseInput struct {
 //
 // A case is stale once its submitted records are all gone. A case with deferred
 // candidates is also stale once a submitted record has a newer version or was
-// deleted, and a case created for two entities once the records of the other
-// entity are all gone or all its records share one entity. A stale case is
-// removed from the queue.
+// deleted, and a case whose candidates are all deferred once no deferred link
+// connects two existing records in different entities any more: other links
+// joined them, or the records of the candidate are gone. A case created for two
+// entities is stale once the records of the other entity are all gone or all
+// its records share one entity. A stale case is removed from the queue.
 //
 // A claim fails with the error type tilores.entity_busy while one of these
 // entities is locked by another operation: an ingest, the assembly of a decision
