@@ -161,6 +161,11 @@ type ClaimReviewCaseInput struct {
 // case created for two entities once the records of the other entity are all
 // gone or all its records share one entity. A stale case is removed from the
 // queue.
+//
+// A claim fails with the error type tilores.entity_busy while one of these
+// entities is locked by another operation: an ingest, the assembly of a decision
+// that was just applied, or the claim of another reviewer. Nothing is locked
+// then, and the claim may succeed a moment later.
 type ClaimReviewCaseOutput struct {
 	Case               *ReviewCase `json:"case"`
 	EntityID           string      `json:"entityID"`
