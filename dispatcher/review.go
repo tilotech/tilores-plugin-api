@@ -92,10 +92,11 @@ const (
 	ReviewActorHuman ReviewActorKind = "HUMAN"
 	// ReviewActorAgent is an AI agent reviewing on behalf of a person.
 	ReviewActorAgent ReviewActorKind = "AGENT"
-	// ReviewActorProcess is an automated process applying past decisions: a
-	// case whose every link a past decision answers - the newest verdict for
-	// the same pair of records, whatever rules matched it - is resolved with
-	// the past verdicts, see ReviewCaseRaisedInput.
+	// ReviewActorProcess is an automated recheck of a case: a case whose every
+	// link a past decision or the data answers is resolved with these
+	// verdicts. The newest verdict for the same pair of records answers a link,
+	// whatever rules matched it, and a deferred link whose records other links
+	// joined since is kept. See ReviewCaseRaisedInput.
 	ReviewActorProcess ReviewActorKind = "PROCESS"
 )
 
@@ -165,7 +166,9 @@ type ClaimReviewCaseInput struct {
 // connects two existing records in different entities any more: other links
 // joined them, or the records of the candidate are gone. A case created for two
 // entities is stale once the records of the other entity are all gone or all
-// its records share one entity. A stale case is removed from the queue.
+// its records share one entity. A stale case leaves the queue: a case whose
+// records other links joined is rechecked, which keeps those links, see
+// ReviewCaseRaisedInput, and every other one is removed.
 //
 // A claim fails with the error type tilores.entity_busy while one of these
 // entities is locked by another operation: an ingest, the assembly of a decision

@@ -43,19 +43,24 @@ const (
 	// a resolved review case again, see ReviewAssembleInput.
 	EventTypeReviewAssemble = "REVIEW_ASSEMBLE"
 
-	// EventTypeReviewCaseRaised is used after an assembly raised a review case,
-	// see ReviewCaseRaisedInput.
+	// EventTypeReviewCaseRaised is used to recheck a review case after an
+	// assembly raised it, see ReviewCaseRaisedInput.
 	EventTypeReviewCaseRaised = "REVIEW_CASE_RAISED"
 )
 
 // ReviewCaseRaisedInput is the payload of a REVIEW_CASE_RAISED event. The
 // assembly that raised a review case writes it once its plan released its
-// locks. It is not meant to be sent by anybody else.
+// locks. A listing or a claim writes it again, at most once a minute, for an
+// open case whose deferred joins other links answered. It is not meant to be
+// sent by anybody else.
 //
-// If past decisions answer every link of the case - the newest decision with a
-// verdict for the same pair of records, whatever rules matched it - the case
-// is resolved with their verdicts, by an actor of kind PROCESS. Otherwise the
-// event changes nothing and the case waits for a person.
+// The event rechecks the case. The newest decision with a verdict for the same
+// pair of records answers a link, whatever rules matched it. A deferred link
+// that no decision answers is kept if other links joined its two records into
+// one entity since, so that it gets its edges, and rejected if one of its
+// records is gone. If every link is answered, the case is resolved with these
+// verdicts by an actor of kind PROCESS. Otherwise the event changes nothing and
+// the case waits for a person.
 type ReviewCaseRaisedInput struct {
 	CaseID string `json:"caseID"`
 }
