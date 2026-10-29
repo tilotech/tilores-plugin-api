@@ -170,6 +170,17 @@ func TestUnmarshalEvent(t *testing.T) {
 				},
 			},
 		},
+		"review case raised": {
+			input: `{"type": "REVIEW_CASE_RAISED", "payload": {"caseID": "case-1"}}`,
+			expected: &dispatcher.AssembleEvent{
+				Type:    "REVIEW_CASE_RAISED",
+				Payload: &dispatcher.ReviewCaseRaisedInput{CaseID: "case-1"},
+			},
+		},
+		"invalid review case raised payload": {
+			input:       `{"type": "REVIEW_CASE_RAISED", "payload": []}`,
+			expectError: true,
+		},
 		"invalid review assemble payload": {
 			input:       `{"type": "REVIEW_ASSEMBLE", "payload": []}`,
 			expectError: true,

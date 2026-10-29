@@ -92,7 +92,10 @@ const (
 	ReviewActorHuman ReviewActorKind = "HUMAN"
 	// ReviewActorAgent is an AI agent reviewing on behalf of a person.
 	ReviewActorAgent ReviewActorKind = "AGENT"
-	// ReviewActorProcess is an automated process applying earlier decisions.
+	// ReviewActorProcess is an automated process applying past decisions: a
+	// case whose every link a past decision answers - the newest verdict for
+	// the same pair of records, whatever rules matched it - is resolved with
+	// the past verdicts, see ReviewCaseRaisedInput.
 	ReviewActorProcess ReviewActorKind = "PROCESS"
 )
 

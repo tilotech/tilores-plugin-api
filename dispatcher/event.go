@@ -20,6 +20,9 @@ import (
 // In case of type "REVIEW_ASSEMBLE", the payload is a
 // *dispatcher.ReviewAssembleInput.
 //
+// In case of type "REVIEW_CASE_RAISED", the payload is a
+// *dispatcher.ReviewCaseRaisedInput.
+//
 // For backwards compatibility, the old event input for assemble requests is
 // also supported. The output after unmarshaling will be the same as for type
 // "ASSEMBLE".
@@ -39,7 +42,23 @@ const (
 	// EventTypeReviewAssemble is used when the payload assembles the records of
 	// a resolved review case again, see ReviewAssembleInput.
 	EventTypeReviewAssemble = "REVIEW_ASSEMBLE"
+
+	// EventTypeReviewCaseRaised is used after an assembly raised a review case,
+	// see ReviewCaseRaisedInput.
+	EventTypeReviewCaseRaised = "REVIEW_CASE_RAISED"
 )
+
+// ReviewCaseRaisedInput is the payload of a REVIEW_CASE_RAISED event. The
+// assembly that raised a review case writes it once its plan released its
+// locks. It is not meant to be sent by anybody else.
+//
+// If past decisions answer every link of the case - the newest decision with a
+// verdict for the same pair of records, whatever rules matched it - the case
+// is resolved with their verdicts, by an actor of kind PROCESS. Otherwise the
+// event changes nothing and the case waits for a person.
+type ReviewCaseRaisedInput struct {
+	CaseID string `json:"caseID"`
+}
 
 // AssembleEventFlag defines additional flags that can be send in combination
 // with an assemble event.
@@ -88,6 +107,9 @@ func (r *AssembleEvent) UnmarshalJSON(b []byte) error {
 		err = json.Unmarshal(partial.Payload, payload)
 	case EventTypeReviewAssemble:
 		payload = &ReviewAssembleInput{}
+		err = json.Unmarshal(partial.Payload, payload)
+	case EventTypeReviewCaseRaised:
+		payload = &ReviewCaseRaisedInput{}
 		err = json.Unmarshal(partial.Payload, payload)
 	default:
 		return fmt.Errorf("invalid type %s", partial.Type)
