@@ -96,7 +96,8 @@ const (
 	// link a past decision or the data answers is resolved with these
 	// verdicts. The newest verdict for the same pair of records answers a link,
 	// whatever rules matched it, and a deferred link whose records other links
-	// joined since is kept. See ReviewCaseRaisedInput.
+	// joined since is kept. Verdicts that a recheck took from the data do not
+	// answer a later case. See ReviewCaseRaisedInput.
 	ReviewActorProcess ReviewActorKind = "PROCESS"
 )
 

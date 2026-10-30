@@ -58,9 +58,10 @@ const (
 // pair of records answers a link, whatever rules matched it. A deferred link
 // that no decision answers is kept if other links joined its two records into
 // one entity since, so that it gets its edges, and rejected if one of its
-// records is gone. If every link is answered, the case is resolved with these
-// verdicts by an actor of kind PROCESS. Otherwise the event changes nothing and
-// the case waits for a person.
+// records is gone. These two verdicts come from the data, not from a person,
+// so they answer no later case. If every link is answered, the case is
+// resolved with these verdicts by an actor of kind PROCESS. Otherwise the event
+// changes nothing and the case waits for a person.
 type ReviewCaseRaisedInput struct {
 	CaseID string `json:"caseID"`
 }
