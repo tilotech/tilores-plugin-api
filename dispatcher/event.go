@@ -20,6 +20,9 @@ import (
 // In case of type "REVIEW_ASSEMBLE", the payload is a
 // *dispatcher.ReviewAssembleInput.
 //
+// In case of type "REVIEW_CASE_RAISED", the payload is a
+// *dispatcher.ReviewCaseRaisedInput.
+//
 // For backwards compatibility, the old event input for assemble requests is
 // also supported. The output after unmarshaling will be the same as for type
 // "ASSEMBLE".
@@ -39,7 +42,29 @@ const (
 	// EventTypeReviewAssemble is used when the payload assembles the records of
 	// a resolved review case again, see ReviewAssembleInput.
 	EventTypeReviewAssemble = "REVIEW_ASSEMBLE"
+
+	// EventTypeReviewCaseRaised is used to recheck a review case after an
+	// assembly raised it, see ReviewCaseRaisedInput.
+	EventTypeReviewCaseRaised = "REVIEW_CASE_RAISED"
 )
+
+// ReviewCaseRaisedInput is the payload of a REVIEW_CASE_RAISED event. The
+// assembly that raised a review case writes it once its plan released its
+// locks. A listing or a claim writes it again, at most once a minute, for an
+// open case whose deferred joins other links answered. It is not meant to be
+// sent by anybody else.
+//
+// The event rechecks the case. The newest decision with a verdict for the same
+// pair of records answers a link, whatever rules matched it. A deferred link
+// that no decision answers is kept if other links joined its two records into
+// one entity since, so that it gets its edges, and rejected if one of its
+// records is gone. These two verdicts come from the data, not from a person,
+// so they answer no later case. If every link is answered, the case is
+// resolved with these verdicts by an actor of kind PROCESS. Otherwise the event
+// changes nothing and the case waits for a person.
+type ReviewCaseRaisedInput struct {
+	CaseID string `json:"caseID"`
+}
 
 // AssembleEventFlag defines additional flags that can be send in combination
 // with an assemble event.
@@ -88,6 +113,9 @@ func (r *AssembleEvent) UnmarshalJSON(b []byte) error {
 		err = json.Unmarshal(partial.Payload, payload)
 	case EventTypeReviewAssemble:
 		payload = &ReviewAssembleInput{}
+		err = json.Unmarshal(partial.Payload, payload)
+	case EventTypeReviewCaseRaised:
+		payload = &ReviewCaseRaisedInput{}
 		err = json.Unmarshal(partial.Payload, payload)
 	default:
 		return fmt.Errorf("invalid type %s", partial.Type)
