@@ -30,6 +30,8 @@ type Dispatcher interface {
 	ReleaseReviewCase(ctx context.Context, input *ReleaseReviewCaseInput) (*ReleaseReviewCaseOutput, error)
 	ResolveReviewCase(ctx context.Context, input *ResolveReviewCaseInput) (*ResolveReviewCaseOutput, error)
 	ReviewDecisions(ctx context.Context, input *ReviewDecisionsInput) (*ReviewDecisionsOutput, error)
+	EntityStreamEvents(ctx context.Context, input *EntityStreamEventsInput) (*EntityStreamEventsOutput, error)
+	AcknowledgeEntityStreamEvents(ctx context.Context, input *AcknowledgeEntityStreamEventsInput) (*AcknowledgeEntityStreamEventsOutput, error)
 }
 
 // EntityInput includes the data required to get an entity by its ID

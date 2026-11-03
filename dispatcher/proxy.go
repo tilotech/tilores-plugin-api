@@ -145,3 +145,21 @@ func (p *proxy) ReviewDecisions(ctx context.Context, input *ReviewDecisionsInput
 	}
 	return response, nil
 }
+
+func (p *proxy) EntityStreamEvents(ctx context.Context, input *EntityStreamEventsInput) (*EntityStreamEventsOutput, error) {
+	response := &EntityStreamEventsOutput{}
+	err := p.client.Call(ctx, entityStreamEventsMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (p *proxy) AcknowledgeEntityStreamEvents(ctx context.Context, input *AcknowledgeEntityStreamEventsInput) (*AcknowledgeEntityStreamEventsOutput, error) {
+	response := &AcknowledgeEntityStreamEventsOutput{}
+	err := p.client.Call(ctx, acknowledgeEntityStreamEventsMethod, input, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
