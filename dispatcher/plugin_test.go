@@ -170,6 +170,19 @@ func TestPlugin(t *testing.T) {
 	assert.Equal(t, &testReviewDecision, decisionsOutput.Decisions[0])
 	require.NotNil(t, decisionsOutput.NextCursor)
 	assert.Equal(t, "someCursor", *decisionsOutput.NextCursor)
+
+	eventsOutput, err := dsp.EntityStreamEvents(context.Background(), &dispatcher.EntityStreamEventsInput{
+		Limit: 2,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, testEntityStreamEvents, eventsOutput.Events)
+
+	acknowledgeOutput, err := dsp.AcknowledgeEntityStreamEvents(context.Background(), &dispatcher.AcknowledgeEntityStreamEventsInput{
+		AckTokens: []string{"someToken", "someOtherToken"},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, 1, acknowledgeOutput.Acknowledged)
+	assert.Equal(t, []string{"someOtherToken"}, acknowledgeOutput.InvalidAckTokens)
 }
 
 type testDispatcher struct {
@@ -250,6 +263,37 @@ var testReviewDecision = dispatcher.ReviewDecision{
 	Actor:     testReviewActor,
 	Reason:    "someReason",
 	DecidedAt: time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC),
+}
+
+var testEntityStreamOffloadURL = "https://example.com/someEvent.json"
+
+var testEntityStreamEvents = []*dispatcher.EntityStreamEvent{
+	{
+		AckToken:  "someToken",
+		Type:      dispatcher.EntityStreamEventMerge,
+		Timestamp: time.Date(2026, 11, 2, 12, 0, 0, 123456789, time.UTC),
+		Data: &dispatcher.EntityStreamEventData{
+			Entities: []dispatcher.EntityStreamEntityInfo{
+				{
+					ID:                "someEntity",
+					RecordIDs:         []string{"12345", "67890"},
+					ObsoleteRecordIDs: []string{"11111"},
+					Insights:          map[string]any{"someInsight": "someValue"},
+				},
+			},
+			ObsoleteEntities: []dispatcher.EntityStreamEntityInfo{
+				{
+					ID: "someOtherEntity",
+				},
+			},
+		},
+	},
+	{
+		AckToken:  "someOtherToken",
+		Type:      dispatcher.EntityStreamEventOffload,
+		Timestamp: time.Date(2026, 11, 2, 12, 0, 1, 0, time.UTC),
+		URL:       &testEntityStreamOffloadURL,
+	},
 }
 
 func (d *testDispatcher) Entity(ctx context.Context, _ *dispatcher.EntityInput) (*dispatcher.EntityOutput, error) {
@@ -349,5 +393,18 @@ func (d *testDispatcher) ReviewDecisions(_ context.Context, _ *dispatcher.Review
 	return &dispatcher.ReviewDecisionsOutput{
 		Decisions:  []*dispatcher.ReviewDecision{&testReviewDecision},
 		NextCursor: &cursor,
+	}, nil
+}
+
+func (d *testDispatcher) EntityStreamEvents(_ context.Context, _ *dispatcher.EntityStreamEventsInput) (*dispatcher.EntityStreamEventsOutput, error) {
+	return &dispatcher.EntityStreamEventsOutput{
+		Events: testEntityStreamEvents,
+	}, nil
+}
+
+func (d *testDispatcher) AcknowledgeEntityStreamEvents(_ context.Context, input *dispatcher.AcknowledgeEntityStreamEventsInput) (*dispatcher.AcknowledgeEntityStreamEventsOutput, error) {
+	return &dispatcher.AcknowledgeEntityStreamEventsOutput{
+		Acknowledged:     len(input.AckTokens) - 1,
+		InvalidAckTokens: input.AckTokens[1:],
 	}, nil
 }

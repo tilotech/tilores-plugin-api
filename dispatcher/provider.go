@@ -19,20 +19,22 @@ type provider struct {
 }
 
 const (
-	entityMethod              = "/entity"
-	entityByRecordMethod      = "/entity-by-record"
-	submitMethod              = "/submit"
-	submitWithPreviewMethod   = "/submit-with-preview"
-	disassembleMethod         = "/disassemble"
-	removeConnectionBanMethod = "/removeconnectionban"
-	searchMethod              = "/search"
-	assemblyStatusMethod      = "/assembly-status"
-	reviewCasesMethod         = "/review-cases"
-	createReviewCaseMethod    = "/create-review-case"
-	claimReviewCaseMethod     = "/claim-review-case"
-	releaseReviewCaseMethod   = "/release-review-case"
-	resolveReviewCaseMethod   = "/resolve-review-case"
-	reviewDecisionsMethod     = "/review-decisions"
+	entityMethod                        = "/entity"
+	entityByRecordMethod                = "/entity-by-record"
+	submitMethod                        = "/submit"
+	submitWithPreviewMethod             = "/submit-with-preview"
+	disassembleMethod                   = "/disassemble"
+	removeConnectionBanMethod           = "/removeconnectionban"
+	searchMethod                        = "/search"
+	assemblyStatusMethod                = "/assembly-status"
+	reviewCasesMethod                   = "/review-cases"
+	createReviewCaseMethod              = "/create-review-case"
+	claimReviewCaseMethod               = "/claim-review-case"
+	releaseReviewCaseMethod             = "/release-review-case"
+	resolveReviewCaseMethod             = "/resolve-review-case"
+	reviewDecisionsMethod               = "/review-decisions"
+	entityStreamEventsMethod            = "/entity-stream-events"
+	acknowledgeEntityStreamEventsMethod = "/acknowledge-entity-stream-events"
 )
 
 func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.InvokeFunc, error) {
@@ -65,6 +67,10 @@ func (p *provider) Provide(method string) (plugin.RequestParameter, plugin.Invok
 		return &ResolveReviewCaseInput{}, p.ResolveReviewCase, nil
 	case reviewDecisionsMethod:
 		return &ReviewDecisionsInput{}, p.ReviewDecisions, nil
+	case entityStreamEventsMethod:
+		return &EntityStreamEventsInput{}, p.EntityStreamEvents, nil
+	case acknowledgeEntityStreamEventsMethod:
+		return &AcknowledgeEntityStreamEventsInput{}, p.AcknowledgeEntityStreamEvents, nil
 	}
 	return nil, nil, fmt.Errorf("invalid method %v", method)
 }
@@ -123,4 +129,12 @@ func (p *provider) ResolveReviewCase(ctx context.Context, params plugin.RequestP
 
 func (p *provider) ReviewDecisions(ctx context.Context, params plugin.RequestParameter) (any, error) {
 	return p.impl.ReviewDecisions(ctx, params.(*ReviewDecisionsInput))
+}
+
+func (p *provider) EntityStreamEvents(ctx context.Context, params plugin.RequestParameter) (any, error) {
+	return p.impl.EntityStreamEvents(ctx, params.(*EntityStreamEventsInput))
+}
+
+func (p *provider) AcknowledgeEntityStreamEvents(ctx context.Context, params plugin.RequestParameter) (any, error) {
+	return p.impl.AcknowledgeEntityStreamEvents(ctx, params.(*AcknowledgeEntityStreamEventsInput))
 }
